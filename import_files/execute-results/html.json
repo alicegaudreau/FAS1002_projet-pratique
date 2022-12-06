@@ -1,0 +1,14 @@
+{
+  "hash": "e483aec194d0664c332bfe7aa92737cf",
+  "result": {
+    "markdown": "---\ntitle: \"Titre de votre page d'importation\"\ntitle-block-banner: true\ndescription: | \n  Petite description de cette page.\n# à changer\ndate: \"2022-12-21\"\n# Modifier les détails que vous voulez\nauthor:\n  - name: \"Prénom Nom\"\n    # Votre site web perso ou github\n    url: https://github.com/VOTREUSERNAME\n    # les champs d'affiliation sont optionnels, vous pouvez les\n    # comment out en ajoutant un # devant.\n    affiliation: FAS1002\n    affiliation-url: https://FAS1002.github.io/A22\n    # changer pour votre propre orcid id\n    # https://orcid.org/ pour vous inscrire.\n    orcid: 0000-0000-0000-0000\n\n# TRUE == Générer une citation pour cette page précise. Pour enlever, mettre false.\ncitation: true\n# Inclure les références que vous utilisez dans vos rapports. Je conseille Zotero pour construire\n# ce fichier ou de connecter RStudio directement pour pouvoir citer avec @nom-de-reference.\nbibliography: references.bib\n---\n\n\nIl est maintenant le temps de décrire votre projet avant de passer au document suivant, soit l'importation et la manipulation des données.\n\nJe vous conseille d'écrire cette partie en dernier, une fois que vous aurez déjà vos résultats et figures afin d'éviter de réécrire cette page plusieurs fois.\n\n::: callout-important\nN'oubliez pas d'inclure vos références sur chacune des pages!\n:::\n\nPar exemple:\n\n> Les données proviennent entre autres de @owidenergy.\n\n\n::: {.cell}\n\n:::\n\n::: {.cell hash='import_cache/html/download_9ee6756551eeb9ce8da25ff19efee24d'}\n\n```{.r .cell-code}\n#avec cache, quand on render le document, ca ne va pas toujours re-telecharger le code chunk\nURL <- \"https://github.com/FAS1002/A22/raw/main/assets/fichiers/olympic_archive.zip\"\n\nbase_path <- path(\"data\", \"raw\")\nfname <- paste(today(), \"olympic_archive.zip\", sep = \"_\")\n#creer le nom de fichier quon veut avec lubridate\n\nfpath <- path(base_path, \n              fname) #path combined\n\ndownload.file(url = URL, destfile = fpath) #\n```\n:::\n\n\nLe fichier a ete telecharge ici : data/raw/2022-11-29_olympic_archive.zip\n\n\n::: {.cell}\n\n```{.r .cell-code}\nunzip(zipfile = fpath, exdir = base_path)\n```\n:::\n\n\nDeux nouveaux fichiers CSV sont apparus apres le dezippage : data/raw/2022-11-29_olympic-archive.zip, data/raw/2022-11-29_olympic_archive.zip, data/raw/athlete_events.csv, data/raw/noc_regions.csv, data/raw/olympic.zip, data/raw/olympic_archive.zip\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

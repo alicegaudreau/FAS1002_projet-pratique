@@ -23,7 +23,82 @@ citation: true
 # Inclure les références que vous utilisez dans vos rapports. Je conseille Zotero pour construire
 # ce fichier ou de connecter RStudio directement pour pouvoir citer avec @nom-de-reference.
 bibliography: references.bib
+format :
+    html:
+        df-print: paged
 ---
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+ download.file("https://github.com/FAS1002/A22/raw/main/assets/fichiers/olympic_archive.zip", destfile = "data/raw/olympic_archive.zip")
+ 
+ library(fs)
+ library(lubridate)
+ library(tidyverse)
+ library(skimr)
+ library(ggplot2)
+```
+
+## Réimporter les données
+
+Mettre une fonction qui source le document .R avec les données toute propres
+
+```{r}
+df <- read_csv(file = "data/raw/athlete_events.csv")
+skim(df)
+
+#pourquoi une personne de 97 ans a participe
+
+p1 <- ggplot(data = df,
+       mapping = aes(x = Age)) 
+
+p1 + geom_histogram()
+
+p1 + geom_histogram(colour = "black",
+                    fill = "#facade",
+                    binwidth = 1)
+```
+
+```{r}
+df %>% filter(Age >= 79) %>%  #filtre les rangees
+        select(Name, Age, Games, Sport)#filtre les colonnes
+
+#rendre joli - ggtable or kable 
+
+```
+
+## Age vs Sexe
+
+```{r}
+p2 <- ggplot(data = df, 
+             mapping = aes(x = Sex, y = Age))
+p2 + geom_boxplot()
+```
+
+## Evolution du ratio H-F
+
+```{r}
+#on regroupe par genre
+evolution <- df %>% 
+    group_by(Year, Sex) %>% 
+    summarise(n = n()) %>% #creates new df petit tableau
+    mutate(ratio = n / sum(n)) #creates new col
+
+    
+```
+
+```{r}
+
+evolution_f <- evolution %>% filter(Sex == "F")
+evolution_m <- evolution %>% filter(Sex == "M")
+
+ggplot(evolution, aes(x = Year, y = pourcent, color = Sex), ) + geom_line() + geom_point()
+
+#p3 <- ggplot(evolution_f, aes = x = Year, y = pourcent)) + geom_line() + geom_point()
+
+#p4 <- ggplot(evolution_m, aes = x = Year, y = pourcent)) + geom_line() + geom_point()
+
+#p5 <- ggplot() + geom_line(aes = x(evolution_f$Year, y = evolution_f$pourcent))
+```
 
 ## Un peu d'interactivité pour le plaisir!
 
@@ -71,6 +146,8 @@ fig <- fig %>%
 fig
 ```
 
--------------------------------------------------------------------------------
+------------------------------------------------------------------------
 
 À votre imagination de jouer!
+
+@dorling2007

@@ -1,31 +1,24 @@
 ---
-title: "Titre de votre page d'importation"
+title: "Importation des données"
 title-block-banner: true
 description: | 
-  Petite description de cette page.
-# à changer
+  Cette page est utilisée afin de télécharger les données.
 date: "2022-12-21"
-# Modifier les détails que vous voulez
 author:
-  - name: "Prénom Nom"
-    # Votre site web perso ou github
-    url: https://github.com/VOTREUSERNAME
-    # les champs d'affiliation sont optionnels, vous pouvez les
-    # comment out en ajoutant un # devant.
+  - name: "Alice Gaudreau"
+    url: https://github.com/alicegaudreau
     affiliation: FAS1002
     affiliation-url: https://FAS1002.github.io/A22
-    # changer pour votre propre orcid id
-    # https://orcid.org/ pour vous inscrire.
-    orcid: 0000-0000-0000-0000
-
-# TRUE == Générer une citation pour cette page précise. Pour enlever, mettre false.
+    orcid: 0000-0002-4470-0506
 citation: true
-# Inclure les références que vous utilisez dans vos rapports. Je conseille Zotero pour construire
-# ce fichier ou de connecter RStudio directement pour pouvoir citer avec @nom-de-reference.
 bibliography: references.bib
 ---
 
-Il est maintenant le temps de décrire votre projet avant de passer au document suivant, soit l'importation et la manipulation des données.
+# Objectif du projet
+
+L'objectif de ce projet est de XXXX.
+
+\[A MODIFIER\] Il est maintenant le temps de décrire votre projet avant de passer au document suivant, soit l'importation et la manipulation des données.
 
 Je vous conseille d'écrire cette partie en dernier, une fois que vous aurez déjà vos résultats et figures afin d'éviter de réécrire cette page plusieurs fois.
 
@@ -33,12 +26,12 @@ Je vous conseille d'écrire cette partie en dernier, une fois que vous aurez dé
 N'oubliez pas d'inclure vos références sur chacune des pages!
 :::
 
-Par exemple:
+# Sources des données
 
-> Les données proviennent entre autres de @owidenergy.
+> Ce projet combine les données sur les émissions de gas à effet de serre @owidco2andothergreenhousegasemissions et l'énergie @owidenergy de la source de données en libre accès [Our World In Data](https://ourworldindata.org/). Ces données sont également combinées, par pays, avec les données de [Gap Minder](https://www.gapminder.org/) sur l'espérance de vie à la naissance @gapminderlifeexpectancyatbirth.
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
- download.file("https://github.com/FAS1002/A22/raw/main/assets/fichiers/olympic_archive.zip", destfile = "data/raw/olympic_archive.zip")
+ download.file("https://github.com/owid/co2-data/blob/b61213608e199db5cebb19217fe792a3971e4d2e/owid-co2-data.csv", destfile = "data/raw/co2-data.csv")
  
  library(fs)
  library(lubridate)
@@ -49,27 +42,63 @@ Par exemple:
 
 ```{r download, cache = TRUE}
 #avec cache, quand on render le document, ca ne va pas toujours re-telecharger le code chunk
-URL <- "https://github.com/FAS1002/A22/raw/main/assets/fichiers/olympic_archive.zip"
+
+#Data CO2
+URL_CO2 <- "https://github.com/owid/co2-data/raw/master/owid-co2-data.csv"
 
 base_path <- path("data", "raw")
-fname <- paste(today(), "olympic_archive.zip", sep = "_")
+fname <- paste(today(), "co2-data.csv", sep = "_")
 #creer le nom de fichier quon veut avec lubridate
 
 fpath <- path(base_path, 
               fname) #path combined
 
-download.file(url = URL, destfile = fpath) #
+download.file(url = URL_CO2, destfile = fpath) 
+
+CO2 <- read.csv(file = 'data/raw/2022-12-06_co2-data.csv')
+
+#Data Energy
+
+URL_Energy <- "https://github.com/owid/energy-data/raw/11fb69e2c83c73d1e964075d711a03fef6262e9a/owid-energy-data.csv"
+
+base_path <- path("data", "raw")
+fname <- paste(today(), "energy-data.csv", sep = "_")
+#creer le nom de fichier quon veut avec lubridate
+
+fpath <- path(base_path, 
+              fname) #path combined
+
+download.file(url = URL_Energy, destfile = fpath) 
+
+Energie <- read.csv(file = 'data/raw/2022-12-06_energy-data.csv')
+
+#Comment faire pour rendre ce lien dynamique ?
+
+#Data Life Expectancy
+#J'ai téléchargé les données par pays directement à partir du Google Drive et ajouté le csv au projet. 
+
+LifeExp <- read.csv(file = 'data/raw/GM-LifeExpectancy-countries-by-year.csv')
+
 
 ```
 
-Le fichier a ete telecharge ici : `r fpath`
+Le fichier a été téléchargé ici : `r fpath`
 
-```{r extraction}
+```{r combinaison}
 
-unzip(zipfile = fpath, exdir = base_path)
+#je mets le iso code en majuscules pour que cela corresponde aux datasets de Our World in Data. 
+
+LifeExp$geo <- toupper(LifeExp$geo)
+
+LifeExp2 <- rename(LifeExp, iso_code = geo,
+       year = time)
+
+dat <- merge(Energie,LifeExp2, by= c("iso_code"))
+
+#A faire : déterminer comment mettre les données ensemble
 ```
 
-Deux nouveaux fichiers CSV sont apparus apres le dezippage : `r fs::dir_ls(base_path)`
+Un nouveau fichiers CSV sont apparus apres le dezippage : `r fs::dir_ls(base_path)`
 
 ```{r read}
 

@@ -1,22 +1,14 @@
 ---
-title: "Titre de votre page d'exploration"
+title: "Exploration des données"
 title-block-banner: false
 description: | 
-  Petite description de cette page.
-# à changer
-date: "2022-12-21"
-# Modifier les détails que vous voulez
+  Cette page recense des statistiques descriptives issues des données. Elles sont utilisées afin d'explorer les variables et de choisir des données intéressantes pour des analyses multivariées. 
 author:
-  - name: "Prénom Nom"
-    # Votre site web perso ou github
-    url: https://github.com/VOTREUSERNAME
-    # les champs d'affiliation sont optionnels, vous pouvez les
-    # comment out en ajoutant un # devant.
+  - name: "Alice Gaudreau"
+    url: https://github.com/alicegaudreau
     affiliation: FAS1002
     affiliation-url: https://FAS1002.github.io/A22
-    # changer pour votre propre orcid id
-    # https://orcid.org/ pour vous inscrire.
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0002-4470-0506
 
 # TRUE == Générer une citation pour cette page précise. Pour enlever, mettre false.
 citation: true
@@ -42,46 +34,114 @@ format :
 
 Mettre une fonction qui source le document .R avec les données toute propres
 
-```{r}
-df <- read_csv(file = "data/raw/athlete_events.csv")
-skim(df)
+```{r récupérer les données}
+#récupérer les données 
+merged_data <- read_csv(file = "data/raw/merged_data.csv")
+LifeExp <- read_csv(file = "data/raw/GM-LifeExpectancy-countries-by-year.csv")
+#skim(merged_data)
 
-#pourquoi une personne de 97 ans a participe
+#télécharger un CSV qui associe les codes de pays à des continents. 
+download.file(url = "https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv", destfile = "data/raw/continents.csv") 
 
-p1 <- ggplot(data = df,
-       mapping = aes(x = Age)) 
+continents <- read_csv(file = "data/raw/continents.csv")
 
-p1 + geom_histogram()
 
-p1 + geom_histogram(colour = "black",
-                    fill = "#facade",
-                    binwidth = 1)
+#p1 <- ggplot(data = df, mapping = aes(x = Age)) 
+
+#p1 + geom_histogram()
+
+#p1 + geom_histogram(colour = "black", fill = "#facade", binwidth = 1)
 ```
 
-```{r}
-df %>% filter(Age >= 79) %>%  #filtre les rangees
-        select(Name, Age, Games, Sport)#filtre les colonnes
+## Ajout de variables
+
+```{r ajouter une variable continents}
+
+continents_petit <- continents %>% select("alpha-3", "region") %>% 
+    rename(iso_code = "alpha-3", continent = region)
+
+
+merged_data_continent <- dplyr::inner_join(merged_data, continents_petit) %>%
+  arrange(iso_code)
+
+#df %>% filter(Age >= 79) %>%  #filtre les rangees
+       # select(Name, Age, Games, Sport)#filtre les colonnes
 
 #rendre joli - ggtable or kable 
 
 ```
 
-## Age vs Sexe
+```{r temps ecoule en jours}
 
-```{r}
-p2 <- ggplot(data = df, 
-             mapping = aes(x = Sex, y = Age))
-p2 + geom_boxplot()
+LifeExDate <- LifeExp %>%
+mutate(jour_mois = "-01-01") %>% #ajouter une colonne avec -MM-DD
+    unite(time, jour_mois, col = time, sep = "") %>% #combiner les deux colonnes
+    mutate(year_as_date = as.Date(time, format = "%Y-%m-%d")) #transformer en format de date
+    
+as.numeric(difftime(as.POSIXct(today()), 
+                    as.POSIXct(as.Date(min(LifeExDate$year_as_date), format = "%Y-%m-%d"))))
+    
 ```
 
-## Evolution du ratio H-F
+```{r ajouter une variable "temps depuis"}
+library(lubridate)
+class(merged_data_continent$year) #c'est compris comme un integer et non une date actuellement
 
-```{r}
+#je transforme l'annee en characteres de dates YYYY-MM-DD pour que le compte de jours débute à partir du 1er janvier de l'année
+merged_data_continent2 <- merged_data_continent %>%
+   mutate(jour_mois = "-01-01") %>% #ajouter une colonne avec -MM-DD
+    unite(year, jour_mois, col = year, sep = "") %>% #combiner les deux colonnes
+    mutate(year_as_date = as.Date(year, format = "%Y-%m-%d")) #transformer en format de date
+
+class(merged_data_continent2$year_as_date) #succès !!!!
+
+#Tentative 1 avec des dates POSIXct et difftime
+full_db <- merged_data_continent2 %>%  mutate(temps_depuis = as.numeric(difftime(as.POSIXct(today()), as.POSIXct(year_as_date))))
+
+#Tentative 2 avec time length
+#years_diff <- time_length(difftime(date1, date2), "years")
+
+#full_db <- merged_data_continent
+
+
+
+```
+
+```{r ajouter une variable gdp per capita}
+
+full_db2 <- full_db %>% mutate(gdp_per_capita = (gdp/population))
+```
+
+## Manipulation des données
+
+En premier lieu, il est nécessaire de vérifier que les données sont stockées correctement afin de pouvoir faire des manipulation à partir de celles-ci
+
+```{r manip}
+
+full_db_tibble <- as_tibble(full_db2)
+
+print(class(full_db_tibble$population)) #numeric ok
+summary(full_db_tibble$Life.expectancy) #numeric ok # les donnees minimum sont vraiment petites. 6 ans, vraiment ?
+summary(full_db_tibble$gdp_per_capita) 
+summary(full_db_tibble$primary_energy_consumption) 
+
+
+```
+
+## Analyse de variables
+
+```{r univarie }
+
+full_db_tibble %>% energy_per_gdp %>% 
+    group_by(iso_code, country, year, energy_per_gdp) %>% 
+    summarise()
+
+
 #on regroupe par genre
-evolution <- df %>% 
-    group_by(Year, Sex) %>% 
-    summarise(n = n()) %>% #creates new df petit tableau
-    mutate(ratio = n / sum(n)) #creates new col
+#evolution <- df %>% 
+    #group_by(Year, Sex) %>% 
+    #summarise(n = n()) %>% #creates new df petit tableau
+    #mutate(ratio = n / sum(n)) #creates new col
 
     
 ```
@@ -115,21 +175,29 @@ leaflet() %>%
     addProviderTiles(providers$Esri.WorldGrayCanvas)
 ```
 
-## Peut-être que ça vous inspirera!
+## Consommation d'énergie
+
+### Consommation d'énergie et population
+
+Existe-t-il un lien entre l'aumentation de la population d'un pays et sa consommation d'énergie ? Nous pourrions être tenté de croire que c'est le cas et qu'avec une population qui augmente, la consommation d'énergie augmente aussi.
+
+Toutefois, comme on peut le voir dans le graphique ci-bas, bien que la population ait augmenté pour la majorité des pays représentés, la consommation d'énergie n'augmente pas de manière proportionnelle.
+
+Au lieu de cela, on voit certains joueurs (les États-Unis, la Chine, la Russie et l'Inde) se démarquer tout particulièrement avec une consommation d'énergie qui augmente de façon exponentielle. En comparaison, plusieurs pays de l'Asie de l'Est (Pakistan, Bangladesh, Philippines, pour ne nommer que ceux-là) ont vu leur population augmenter considérablement depuis 1965, mais dont la consommation d'énergie est restée stable ou a augmenté d'une moindre mesure.
 
 ```{r plotly, message=FALSE, warning=FALSE}
 library(plotly)
 library(gapminder)
-df <- gapminder
 
-fig <- df %>%
+
+fig <- full_db_tibble %>%
   plot_ly(
-    x = ~ gdpPercap,
-    y = ~ lifeExp,
-    size = ~ pop,
+    x = ~ population, 
+    y = ~ fossil_fuel_consumption,
     color = ~ continent,
     frame = ~ year,
     text = ~ country,
+    na.rm = TRUE,
     hoverinfo = "text",
     type = 'scatter',
     mode = 'markers',
@@ -148,6 +216,8 @@ fig
 
 ------------------------------------------------------------------------
 
-À votre imagination de jouer!
+### Type d'énergie consommé au fil du temps
 
-@dorling2007
+```{r}
+
+```

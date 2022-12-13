@@ -16,17 +16,23 @@ bibliography: references.bib
 
 # Objectif du projet
 
-L'objectif de ce projet est de XXXX.
+L'objectif de ce projet est d'analyser les données de consommation et de production d'énergie mondiale afin d'en observer l'évolution dans le temps.
 
-\[A MODIFIER\] Il est maintenant le temps de décrire votre projet avant de passer au document suivant, soit l'importation et la manipulation des données.
+Pour ce faire, le rapport qui suit explore différentes questions de recherche centrée sur la production et la consommation d'énergie.
 
-Je vous conseille d'écrire cette partie en dernier, une fois que vous aurez déjà vos résultats et figures afin d'éviter de réécrire cette page plusieurs fois.
+## Volet production d'énergie
 
-::: callout-important
-N'oubliez pas d'inclure vos références sur chacune des pages!
-:::
+-   L'augmentation de la production d'énergie d'un pays est-elle corrélée avec l'évolution de sa population ?
 
-# Sources des données
+-   Y a-t-il un lien entre l'augmentation de la richesse d'un pays et sa production d'énergie fossiles, comme le charbon, le gas et le pétrole ?
+
+## Volet consommation d'énergie
+
+-   Comment la consommation d'énergie est-elle répartie entre les pays ?
+
+-   De quelles sources d'énergie provient l'électricité du monde et comment la repartitionde ces sources a-t-elle évolué dans le temps ?
+
+    # Sources des données
 
 > Ce projet combine les données sur les émissions de gas à effet de serre @owidco2andothergreenhousegasemissions et l'énergie @owidenergy de la source de données en libre accès [Our World In Data](https://ourworldindata.org/). Ces données sont également combinées, par pays, avec les données de [Gap Minder](https://www.gapminder.org/) sur l'espérance de vie à la naissance @gapminderlifeexpectancyatbirth.
 
@@ -37,6 +43,7 @@ N'oubliez pas d'inclure vos références sur chacune des pages!
  library(lubridate)
  library(tidyverse)
  library(skimr)
+ library(purrr)
  
 ```
 
@@ -44,33 +51,31 @@ N'oubliez pas d'inclure vos références sur chacune des pages!
 #avec cache, quand on render le document, ca ne va pas toujours re-telecharger le code chunk
 
 #Data CO2
-URL_CO2 <- "https://github.com/owid/co2-data/raw/master/owid-co2-data.csv"
-
-base_path <- path("data", "raw")
-fname <- paste(today(), "co2-data.csv", sep = "_")
+#URL_CO2 <- "https://github.com/owid/co2-data/raw/master/owid-co2-data.csv"
+#base_path <- path("data", "raw")
+#fname_co2 <- paste(today(), "co2-data.csv", sep = "_")
 #creer le nom de fichier quon veut avec lubridate
-
-fpath <- path(base_path, 
-              fname) #path combined
-
-download.file(url = URL_CO2, destfile = fpath) 
-
-CO2 <- read.csv(file = 'data/raw/2022-12-06_co2-data.csv')
+#fpath_co2 <- path(base_path,  fname_co2) #path combined
+#download.file(url = URL_CO2, destfile = fpath_co2) 
+#CO2 <- read.csv(file = 'data/raw/2022-12-06_co2-data.csv')
 
 #Data Energy
-
 URL_Energy <- "https://github.com/owid/energy-data/raw/11fb69e2c83c73d1e964075d711a03fef6262e9a/owid-energy-data.csv"
 
 base_path <- path("data", "raw")
-fname <- paste(today(), "energy-data.csv", sep = "_")
+fname_Energy <- paste(today(), "energy-data.csv", sep = "_")
 #creer le nom de fichier quon veut avec lubridate
 
-fpath <- path(base_path, 
-              fname) #path combined
+fpath_Energy <- path(base_path, fname_Energy) #path combined
 
-download.file(url = URL_Energy, destfile = fpath) 
+download.file(url = URL_Energy, destfile = fpath_Energy) 
 
+#faire un paste avec le file path avec la date d'incluse
+#Still : 
 Energie <- read.csv(file = 'data/raw/2022-12-06_energy-data.csv')
+
+#dynamique
+#Energie_dynamic <- read.csv(file = fname_Energy)
 
 #Comment faire pour rendre ce lien dynamique ?
 
@@ -91,18 +96,20 @@ Le fichier a été téléchargé ici : `r fpath`
 LifeExp$geo <- toupper(LifeExp$geo)
 
 LifeExp2 <- rename(LifeExp, iso_code = geo,
-       year = time)
+                   year = time, 
+                   country = name)
 
-dat <- merge(Energie,LifeExp2, by= c("iso_code"))
 
-#A faire : déterminer comment mettre les données ensemble
+
+#Mettre Energy et Life Exp ensemble
+merged_data <- dplyr::inner_join(Energie, LifeExp2) %>%
+  arrange(iso_code, year, country)
+
+
 ```
 
-Un nouveau fichiers CSV sont apparus apres le dezippage : `r fs::dir_ls(base_path)`
+```{r csv}
 
-```{r read}
-
-df <- read_csv(file = path(base_path, "athlete_events.csv"))
-skim(df)
-
+#créer un csv avec les données
+write.csv(merged_data, "data/raw/merged_data.csv", row.names=FALSE)
 ```

@@ -37,15 +37,22 @@ Pour ce faire, le rapport qui suit explore différentes questions de recherche c
 > Ce projet combine les données sur les émissions de gas à effet de serre @owidco2andothergreenhousegasemissions et l'énergie @owidenergy de la source de données en libre accès [Our World In Data](https://ourworldindata.org/). Ces données sont également combinées, par pays, avec les données de [Gap Minder](https://www.gapminder.org/) sur l'espérance de vie à la naissance @gapminderlifeexpectancyatbirth.
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
- download.file("https://github.com/owid/co2-data/blob/b61213608e199db5cebb19217fe792a3971e4d2e/owid-co2-data.csv", destfile = "data/raw/co2-data.csv")
- 
+
  library(fs)
  library(lubridate)
  library(tidyverse)
  library(skimr)
  library(purrr)
+ install.packages("cronR")
+ library(cronR)
  
 ```
+
+f \<- system.file(package = "cronR", "extdata", "desespoir1000.R")
+
+cmd \<- cron_rscript(f)
+
+cron_add(command = cmd, frequency = 'minutely', id = 'test1', description = 'My process 1')
 
 ```{r download, cache = TRUE}
 #avec cache, quand on render le document, ca ne va pas toujours re-telecharger le code chunk
@@ -60,19 +67,25 @@ Pour ce faire, le rapport qui suit explore différentes questions de recherche c
 #CO2 <- read.csv(file = 'data/raw/2022-12-06_co2-data.csv')
 
 #Data Energy
-URL_Energy <- "https://github.com/owid/energy-data/raw/11fb69e2c83c73d1e964075d711a03fef6262e9a/owid-energy-data.csv"
+telecharger_donnees <- function() {
+  URL_Energy <- "https://github.com/owid/energy-data/raw/11fb69e2c83c73d1e964075d711a03fef6262e9a/owid-energy-data.csv"
 
-base_path <- path("data", "raw")
+base_path <- file.path("data", "raw")
 fname_Energy <- paste(today(), "energy-data.csv", sep = "_")
 #creer le nom de fichier quon veut avec lubridate
 
-fpath_Energy <- path(base_path, fname_Energy) #path combined
+fpath_Energy <- file.path(base_path, fname_Energy) #path combined
 
 download.file(url = URL_Energy, destfile = fpath_Energy) 
 
 #faire un paste avec le file path avec la date d'incluse
 #Still : 
 Energie <- read.csv(file = 'data/raw/2022-12-06_energy-data.csv')
+}
+
+telecharger_donnees()
+
+
 
 #dynamique
 #Energie_dynamic <- read.csv(file = fname_Energy)
@@ -83,6 +96,16 @@ Energie <- read.csv(file = 'data/raw/2022-12-06_energy-data.csv')
 #J'ai téléchargé les données par pays directement à partir du Google Drive et ajouté le csv au projet. 
 
 LifeExp <- read.csv(file = 'data/raw/GM-LifeExpectancy-countries-by-year.csv')
+
+
+```
+
+```{r}
+
+# f   <- system.file(package = "cronR", "extdata", "desespoir1000.R")
+cmd <- cron_rscript("./desespoir1000.R")
+cron_add(command = cmd, frequency = 'minutely', id = 'test1', description = 'My process 1')
+
 
 
 ```

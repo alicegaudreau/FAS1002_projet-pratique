@@ -9,18 +9,15 @@ website:
     l'Université de Montréal donné lors du trimestre A2022."
 
   reader-mode: true
-# URL de votre site une fois publié - <VOTREUSERNAME> à changer 
-  site-url: https://VOTREUSERNAME.github.io/FAS1002_projet-final/
-# URL de votre répertoire - VOTREUSERNAME/VOTRE-RÉPERTOIRE à changer
-  repo-url: https://github.com/VOTREUSERNAME/VOTRE-RÉPERTOIRE/
+  site-url: https://alicegaudreau.github.io/FAS1002_projet-pratique/
+  repo-url: https://github.com/alicegaudreau/FAS1002_projet-pratique/
   repo-actions: [edit, issue, source]
   
 # Options à changer pour le menu ou la barre de navigation
   navbar:
     background: primary
     logo: /assets/img/FAS1002.png 	# Logo image to be displayed left of the title.
-    logo-alt: Logo du cours FAS1002
-    # Alternate text for the logo image.
+    logo-alt: Logo du cours FAS1002 # Alternate text for the logo image.
     search: true
     # menu
     left:
@@ -28,11 +25,11 @@ website:
         text: Page d'accueil
       - intro.qmd
       - href: import.qmd
-        text: Titre à changer
+        text: Importation des données
       - exploration.qmd
     right:
       - href: a-propos.qmd
-        text: Page à droite 
+        text: À propos
 
 # footer
   page-footer:
@@ -40,21 +37,19 @@ website:
       [Propulsé par des logiciels libres 💖](https://github.com/FAS1002/A22){.nav-link}
     center:
     # Changer VOTRE NOM pour ce que vous voulez
-      - text: "VOTRE NOM"
-        href: mailto:VOTRECOURRIEL@example.com
+      - text: "Rapport effectué par Alice Gaudreau"
     right:
       - icon: github
         href: https://github.com/FAS1002/
         aria-label: GitHub du cours FAS1002
+        
         
 
 # set favicon
   favicon: /assets/img/FAS1002.png
 format:
   html:
-    theme:
-      light: [flatly, assets/scss/styles.css]
-      dark: [darkly, assets/scss/styles-dark.scss]
+    theme: lux
     code-fold: true
     code-copy: true
     code-overflow: wrap

@@ -64,15 +64,14 @@ continents_petit <- continents %>% select("alpha-3", "region") %>%
 merged_data_continent <- dplyr::inner_join(merged_data, continents_petit) %>%
   arrange(iso_code)
 
-#df %>% filter(Age >= 79) %>%  #filtre les rangees
-       # select(Name, Age, Games, Sport)#filtre les colonnes
+full_db <- merged_data_continent
 
 #rendre joli - ggtable or kable 
 
 ```
 
 ```{r temps ecoule en jours}
-
+library(lubridate)
 LifeExDate <- LifeExp %>%
 mutate(jour_mois = "-01-01") %>% #ajouter une colonne avec -MM-DD
     unite(time, jour_mois, col = time, sep = "") %>% #combiner les deux colonnes
@@ -80,26 +79,26 @@ mutate(jour_mois = "-01-01") %>% #ajouter une colonne avec -MM-DD
     
 as.numeric(difftime(as.POSIXct(today()), 
                     as.POSIXct(as.Date(min(LifeExDate$year_as_date), format = "%Y-%m-%d"))))
+
+#81 430 jours
     
 ```
 
-```{r ajouter une variable "temps depuis"}
-library(lubridate)
-class(merged_data_continent$year) #c'est compris comme un integer et non une date actuellement
+```{r completement se tromper et calculer le temps écoulé en jours depuis chacune des datapoints, echo = FALSE }
+#(lubridate)
+#class(merged_data_continent$year) #c'est compris comme un integer et non une date actuellement
 
 #je transforme l'annee en characteres de dates YYYY-MM-DD pour que le compte de jours débute à partir du 1er janvier de l'année
-merged_data_continent2 <- merged_data_continent %>%
-   mutate(jour_mois = "-01-01") %>% #ajouter une colonne avec -MM-DD
-    unite(year, jour_mois, col = year, sep = "") %>% #combiner les deux colonnes
-    mutate(year_as_date = as.Date(year, format = "%Y-%m-%d")) #transformer en format de date
+#merged_data_continent2 <- merged_data_continent %>%
+  # mutate(jour_mois = "-01-01") %>% #ajouter une colonne avec -MM-DD
+   # unite(year, jour_mois, col = year, sep = "") %>% #combiner les deux colonnes
+    #mutate(year_as_date = as.Date(year, format = "%Y-%m-%d")) #transformer en format de date
 
-class(merged_data_continent2$year_as_date) #succès !!!!
+#class(merged_data_continent2$year_as_date) #succès !!!!
 
 #Tentative 1 avec des dates POSIXct et difftime
-full_db <- merged_data_continent2 %>%  mutate(temps_depuis = as.numeric(difftime(as.POSIXct(today()), as.POSIXct(year_as_date))))
+#full_db <- merged_data_continent2 %>%  mutate(temps_depuis = as.numeric(difftime(as.POSIXct(today()), as.POSIXct(year_as_date)))) #ça marche
 
-#Tentative 2 avec time length
-#years_diff <- time_length(difftime(date1, date2), "years")
 
 #full_db <- merged_data_continent
 

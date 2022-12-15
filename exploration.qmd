@@ -24,10 +24,13 @@ format :
  download.file("https://github.com/FAS1002/A22/raw/main/assets/fichiers/olympic_archive.zip", destfile = "data/raw/olympic_archive.zip")
  
  library(fs)
- library(lubridate)
- library(tidyverse)
- library(skimr)
- library(ggplot2)
+ library(lubridate) #dates
+ library(tidyverse) #la vie
+ library(skimr) #regarder donnees
+ library(ggplot2) #graphiques
+ library(kableExtra) #tableau
+ library(tinytex) #besoin pour kable
+ library(pastecs) #pour faire des analyses descriptives
 ```
 
 ## Réimporter les données
@@ -113,27 +116,104 @@ full_db2 <- full_db %>% mutate(gdp_per_capita = (gdp/population))
 
 ## Manipulation des données
 
-En premier lieu, il est nécessaire de vérifier que les données sont stockées correctement afin de pouvoir faire des manipulation à partir de celles-ci
+En premier lieu, il est nécessaire de vérifier que les données sont stockées correctement afin de pouvoir faire des manipulation à partir de celles-ci.
 
 ```{r manip}
 
+
+#transformer en tibble
 full_db_tibble <- as_tibble(full_db2)
 
+#Variables de base
 print(class(full_db_tibble$population)) #numeric ok
 summary(full_db_tibble$Life.expectancy) #numeric ok # les donnees minimum sont vraiment petites. 6 ans, vraiment ?
 summary(full_db_tibble$gdp_per_capita) 
-summary(full_db_tibble$primary_energy_consumption) 
+
+#Conso energie
+summary(full_db_tibble$primary_energy_consumption) #il y a un zero, c'est bizarre
+
+#Prod energie
+summary(full_db_tibble$oil_prod_per_capita)
+summary(full_db_tibble$gas_prod_per_capita)
+summary(full_db_tibble$coal_prod_per_capita)
+summary(full_db_tibble$oil_production)
+summary(full_db_tibble$gas_production) #bon, vu que je regarde l"ensemble des donnees de differentes annees de production, la median est vraiment basse par rapport au maximum. Pour mes tableaux descriptifs, je vais me concentrer sur des annees en particulier. 
+summary(full_db_tibble$coal_production)
+
+stats_descriptives <- full_db_tibble %>% 
+    select(population, Life.expectancy, gdp_per_capita, primary_energy_consumption, oil_prod_per_capita,gas_prod_per_capita,coal_prod_per_capita) %>% 
+    pastecs::stat.desc()
+
+kable(stats_descriptives)
+
+stats_descriptives
 
 
 ```
 
 ## Analyse de variables
 
-```{r univarie }
+```{r univarie}
 
-full_db_tibble %>% energy_per_gdp %>% 
-    group_by(iso_code, country, year, energy_per_gdp) %>% 
-    summarise()
+synthesegenerale <- full_db_tibble %>%
+    group_by(continent) %>%
+  summarise(
+          count = n(),
+          median_Life_Expectancy = median(Life.expectancy, na.rm = T),
+          median_GDP_per_capita = median(gdp_per_capita, na.rm = T),
+          median_Energy_Consumption = median(primary_energy_consumption, na.rm = T),
+          median_Production_oil = median(oil_production, na.rm = T),
+          median_Production_gas = median(gas_production, na.rm = T),
+          median_Production_Coal = median(coal_production, na.rm = T) )
+    
+    
+#Parce qu'il y a vraiment beaucoup de données, par pays et par année, je vais me concentrer sur les données de 2018 seulement, pour que chaque pays n'ai qu'une entree. Je prends 2018 car  c'est l'année la plus récente pour laquelle les données de GDP sont disponibles. 
+db_2018  <- subset(full_db_tibble, year=='2018') #donnes 2018 seulement
+synthese2018 <- db_2018 %>%
+    group_by(continent) %>%
+  summarise(
+          count = n(), #permet de verifier qu'on a bien les donnees d'une seule année sélectionnée. Ca marche !
+          median_Life_Expectancy = median(Life.expectancy, na.rm = T),
+          median_GDP_per_capita = median(gdp_per_capita, na.rm = T),
+          median_Energy_Consumption = median(primary_energy_consumption, na.rm = T),
+          median_Production_oil = median(oil_production, na.rm = T),
+          median_Production_gas = median(gas_production, na.rm = T),
+          median_Production_Coal = median(coal_production, na.rm = T) )
+
+#Pour le plaisir, comparons avec les données de 2008 puisqu'il y avait une crise économique a ce moment
+db_2008  <- subset(full_db_tibble, year=='2008') #donnes 2018 seulement
+synthese2008 <- db_2008 %>%
+    group_by(continent) %>%
+  summarise(
+          count = n(), #permet de verifier qu'on a bien les donnees d'une seule année sélectionnée. Ca marche !
+          median_Life_Expectancy = median(Life.expectancy, na.rm = T),
+          median_GDP_per_capita = median(gdp_per_capita, na.rm = T),
+          median_Energy_Consumption = median(primary_energy_consumption, na.rm = T),
+          median_Production_oil = median(oil_production, na.rm = T),
+          median_Production_gas = median(gas_production, na.rm = T),
+          median_Production_Coal = median(coal_production, na.rm = T) )
+
+#Ayant recu un message derreur avec ma kable, je revise ses settings.
+options(knitr.table.format = function() {
+  if (knitr::is_latex_output())
+    "latex" else "pipe"
+})
+
+
+
+#Essai 1 - napparait pas 
+# kable(synthese2022, format = "latex", booktabs = T) %>% 
+#   kable_styling(latex_options = "striped")
+
+# #Essai 2 - ok mais la typo est laide
+kable(synthesegenerale)
+kable(synthese2018)
+kable(synthese2008) #wow, grande différence dans la consommation d'énergie dans les Amériques !
+
+
+#full_db_tibble %>% energy_per_gdp %>% 
+    # group_by(iso_code, country, year, energy_per_gdp) %>% 
+    # summarise()
 
 
 #on regroupe par genre
@@ -147,31 +227,16 @@ full_db_tibble %>% energy_per_gdp %>%
 
 ```{r}
 
-evolution_f <- evolution %>% filter(Sex == "F")
-evolution_m <- evolution %>% filter(Sex == "M")
-
-ggplot(evolution, aes(x = Year, y = pourcent, color = Sex), ) + geom_line() + geom_point()
+# evolution_f <- evolution %>% filter(Sex == "F")
+# evolution_m <- evolution %>% filter(Sex == "M")
+# 
+# ggplot(evolution, aes(x = Year, y = pourcent, color = Sex), ) + geom_line() + geom_point()
 
 #p3 <- ggplot(evolution_f, aes = x = Year, y = pourcent)) + geom_line() + geom_point()
 
 #p4 <- ggplot(evolution_m, aes = x = Year, y = pourcent)) + geom_line() + geom_point()
 
 #p5 <- ggplot() + geom_line(aes = x(evolution_f$Year, y = evolution_f$pourcent))
-```
-
-## Un peu d'interactivité pour le plaisir!
-
-```{r map}
-library(leaflet)
-leaflet() %>%
-    setView(lng=150,
-            lat=-30,
-            zoom = 3) %>%
-    addTiles() %>%
-    addMarkers(lng=174.768,
-               lat=-36.852,
-               popup="Là où R est né") %>%
-    addProviderTiles(providers$Esri.WorldGrayCanvas)
 ```
 
 ## Consommation d'énergie

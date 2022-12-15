@@ -1,27 +1,16 @@
 ---
-title: "Titre de votre page d'introduction"
+title: "Introduction"
 title-block-banner: true
 description: | 
-  Petite description de votre projet en une ligne.
-# à changer
+  Ce projet analyse des données sur la production et la consommation de différentes sources d'énergie dans le monde.
 date: "2022-12-21"
-# Modifier les détails que vous voulez
 author:
-  - name: "Prénom Nom"
-    # Votre site web perso ou github
-    url: https://github.com/VOTREUSERNAME
-    # les champs d'affiliation sont optionnels, vous pouvez les
-    # comment out en ajoutant un # devant.
+  - name: "Alice Gaudreau"
+    url: https://github.com/alicegaudreau
     affiliation: FAS1002
     affiliation-url: https://FAS1002.github.io/A22
-    # changer pour votre propre orcid id
-    # https://orcid.org/ pour vous inscrire.
-    orcid: 0000-0000-0000-0000
-
-# TRUE == Générer une citation pour cette page précise. Pour enlever, mettre false.
+    orcid: 0000-0002-4470-0506
 citation: true
-# Inclure les références que vous utilisez dans vos rapports. Je conseille Zotero pour construire
-# ce fichier ou de connecter RStudio directement pour pouvoir citer avec @nom-de-reference.
 bibliography: references.bib
 ---
 

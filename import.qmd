@@ -43,8 +43,8 @@ Pour ce faire, le rapport qui suit explore différentes questions de recherche c
  library(tidyverse)
  library(skimr)
  library(purrr)
- install.packages("cronR")
  library(cronR)
+library(gapminder)
  
 ```
 
@@ -93,18 +93,24 @@ telecharger_donnees()
 #Comment faire pour rendre ce lien dynamique ?
 
 #Data Life Expectancy
-#J'ai téléchargé les données par pays directement à partir du Google Drive et ajouté le csv au projet. 
+#Statique : J'ai téléchargé les données par pays directement à partir du Google Drive et ajouté le csv au projet. 
+#LifeExp <- read.csv(file = 'data/raw/GM-LifeExpectancy-countries-by-year.csv')
 
-LifeExp <- read.csv(file = 'data/raw/GM-LifeExpectancy-countries-by-year.csv')
+#Dynamique
+LifeExp <- gapminder
+
 
 
 ```
 
-```{r}
+```{r essai avec cronr}
+
 
 # f   <- system.file(package = "cronR", "extdata", "desespoir1000.R")
-cmd <- cron_rscript("./desespoir1000.R")
-cron_add(command = cmd, frequency = 'minutely', id = 'test1', description = 'My process 1')
+# path <- file.path("desespoir1000.R")
+# cmd <- cron_rscript(f)
+# cmd
+# cron_add(command = cmd, frequency = 'minutely', id = 'test1', description = 'My process 1')
 
 
 

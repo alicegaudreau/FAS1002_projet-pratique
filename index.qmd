@@ -1,5 +1,5 @@
 ---
-title: "FAS1002_projet-final"
+title: "FAS1002_Alice_Gaudreau_projet-final"
 ---
 
 Vous pouvez faire le résumé de votre projet directement sur cette page et utiliser le document [intro](intro.qmd) pour décrire votre projet.

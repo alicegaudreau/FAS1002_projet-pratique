@@ -31,6 +31,7 @@ format :
  library(kableExtra) #tableau
  library(tinytex) #besoin pour kable
  library(pastecs) #pour faire des analyses descriptives
+ library(ggridges) #pour faires des stacked density plots
 ```
 
 ## Réimporter les données
@@ -249,12 +250,12 @@ Toutefois, comme on peut le voir dans le graphique ci-bas, bien que la populatio
 
 Au lieu de cela, on voit certains joueurs (les États-Unis, la Chine, la Russie et l'Inde) se démarquer tout particulièrement avec une consommation d'énergie qui augmente de façon exponentielle. En comparaison, plusieurs pays de l'Asie de l'Est (Pakistan, Bangladesh, Philippines, pour ne nommer que ceux-là) ont vu leur population augmenter considérablement depuis 1965, mais dont la consommation d'énergie est restée stable ou a augmenté d'une moindre mesure.
 
-```{r plotly, message=FALSE, warning=FALSE}
+```{r Graphique 1 - Consommation denergie, message=FALSE, warning=FALSE}
 library(plotly)
 library(gapminder)
 
 
-fig <- full_db_tibble %>%
+G1_Fossil_Consumption <- full_db_tibble %>%
   plot_ly(
     x = ~ population, 
     y = ~ fossil_fuel_consumption,
@@ -269,19 +270,55 @@ fig <- full_db_tibble %>%
     height = 600
   )
 
-fig <- fig %>% layout(xaxis = list(type = "log"))
-
-fig <- fig %>%
-  animation_button(
-    x = 0, xanchor = "left", y = -0.15, yanchor = "bottom"
-  )
-fig
+G1_Fossil_Consumption <- G1_Fossil_Consumption %>% 
+    layout(xaxis = list(type = "log")) %>%
+    animation_button(
+    x = 0, xanchor = "left", y = -0.15, yanchor = "bottom")
+G1_Fossil_Consumption
 ```
 
 ------------------------------------------------------------------------
 
 ### Type d'énergie consommé au fil du temps
 
-```{r}
+```{r Graphique 2 - Types denergie}
+
+
+# hydro_share_elec
+# gas_share_elec
+# nuclear_share_elec
+# oil_share_elec
+# other_renewables_share_elec
+
+
+#Canada
+donnees_Canada  <- subset(full_db_tibble, iso_code=='CAN') %>%
+    select (year, hydro_share_elec, gas_share_elec, biofuel_share_elec, nuclear_share_elec, oil_share_elec, solar_share_elec, wind_share_elec, other_renewables_share_elec_exc_biofuel) %>% #petit tableau avec les variables dinteret
+    pivot_longer(cols = hydro_share_elec:other_renewables_share_elec_exc_biofuel, names_to = "type_energy", values_drop_na = T) %>% #pour que le type denergie devienne une donnee et non une variable
+    recode(value, 
+          "hydro_share_elec" = "hydro", 
+          "gas_share_elec" = "gaz", 
+          "biofuel_share_elec" "biocarburants", 
+          "nuclear_share_elec" = "nucléaire", 
+          "oil_share_elec" = "pétrole", 
+          "solar_share_elec" = "solaire", 
+          "wind_share_elec" = "éolienne", 
+          "other_renewables_share_elec_exc_biofuel" = "autres énergies renouvelables")
+
+
+G2_Energy_Share_Canada <- ggplot(data = donnees_Canada) + geom_area(mapping = aes(x = year, y= value, na.rm=T, fill = type_energy)) +
+  labs(title = "Graphique 2. Évolution du type \nd'énergie consommé au Canada",subtitle = "Données de 1985 à 2021", x = "Année", y = "pourcentage d'énergie") +
+  theme(text = element_text(family = "Calibri"),
+        plot.margin = unit(c(2,2,2,2), "cm"),
+    plot.title = element_text(size = 20, hjust = 0.5, line = 0.8),
+        plot.subtitle = element_text(size =12, hjust = 1, line = 0.8),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12)) + 
+    scale_colour_brewer(type = "seq", palette = "Spectral")
+
+G2_Energy_Share_Canada
+
+#USA
+
 
 ```

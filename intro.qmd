@@ -18,10 +18,4 @@ Il est maintenant le temps de décrire votre projet avant de passer au document 
 
 Je vous conseille d'écrire cette partie en dernier, une fois que vous aurez déjà vos résultats et figures afin d'éviter de réécrire cette page plusieurs fois.
 
-::: callout-important
-N'oubliez pas d'inclure vos références sur chacune des pages!
-:::
-
-Par exemple:
-
-> Les données proviennent entre autres de @owidenergy.
+> Les données proviennent de @owidenergy et @gapminderlifeexpectancyatbirth. Elles ont été modifiées avec les données de continents de @continents.

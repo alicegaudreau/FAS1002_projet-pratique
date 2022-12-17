@@ -30,7 +30,7 @@ Pour ce faire, le rapport qui suit explore différentes questions de recherche c
 
 -   Comment la consommation d'énergie est-elle répartie entre les pays ?
 
--   De quelles sources d'énergie provient l'électricité du monde et comment la repartitionde ces sources a-t-elle évolué dans le temps ?
+-   De quelles sources d'énergie provient l'électricité du monde et comment la repartition de ces sources a-t-elle évolué dans le temps ?
 
     # Sources des données
 

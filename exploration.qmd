@@ -42,21 +42,15 @@ Mettre une fonction qui source le document .R avec les données toute propres
 
 ```{r récupérer les données}
 #récupérer les données 
-merged_data <- read_csv(file = "data/raw/merged_data.csv")
-LifeExp <- read_csv(file = "data/raw/GM-LifeExpectancy-countries-by-year.csv")
+merged_data <- read_csv(file = "data/raw/merged_data.csv", show_col_types = F)
+LifeExp <- read_csv(file = "data/raw/GM-LifeExpectancy-countries-by-year.csv", show_col_types = F)
+LifeExp_test <- gapminder
 #skim(merged_data)
 
 #télécharger un CSV qui associe les codes de pays à des continents. 
 download.file(url = "https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv", destfile = "data/raw/continents.csv") 
 
-continents <- read_csv(file = "data/raw/continents.csv")
-
-
-#p1 <- ggplot(data = df, mapping = aes(x = Age)) 
-
-#p1 + geom_histogram()
-
-#p1 + geom_histogram(colour = "black", fill = "#facade", binwidth = 1)
+continents <- read_csv(file = "data/raw/continents.csv", show_col_types = F)
 ```
 
 ## Ajout de variables
@@ -75,7 +69,9 @@ Ensuite, la variable de PIB a été divisée par la variable de population pour 
 
 Enfin, à des fins d'intérêt général, une nouvelle variable calcule le temps écoulé en jours depuis chaque année pour lesquelles les données sont collectées. Les données les plus anciennes présentent à la fois dans la base de données sur l'espérance de vie @gapminderlifeexpectancyatbirth datent de 1952, soit il y a près de 26 000 jours.
 
-EEn date du 12 décembre 2022, cela faisait très précisément 25 918 jours.</aside>
+EEn date du 12 décembre 2022, cela faisait très précisément 25 918 jours.
+
+</aside>
 
 ```{r ajouter une variable continents}
 

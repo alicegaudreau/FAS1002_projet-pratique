@@ -2,15 +2,15 @@ project:
   type: website
 
 website:
-  title: "FAS1002_projet-pratique-test"
+  title: "FAS1002_projet-final"
   description: | 
     "Page d'accueil du travail final pour le cours FAS1002 -
     Initiation à la programmation en sciences sociales à
     l'Université de Montréal donné lors du trimestre A2022."
 
   reader-mode: true
-  site-url: https://alicegaudreau.github.io/FAS1002_projet-pratique/
-  repo-url: https://github.com/alicegaudreau/FAS1002_projet-pratique/
+  site-url: https://alicegaudreau.github.io/FAS1002_projet-final/
+  repo-url: https://github.com/alicegaudreau/FAS1002_projet-final/
   repo-actions: [edit, issue, source]
   
 # Options à changer pour le menu ou la barre de navigation

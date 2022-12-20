@@ -16,31 +16,41 @@ bibliography: references.bib
 
 # Objectif du projet
 
-L'objectif de ce projet est d'analyser les données de consommation et de production d'énergie mondiale afin d'en observer l'évolution dans le temps.
+L'objectif de ce projet est d'analyser les données de consommation et de
+production d'énergie mondiale afin d'en observer l'évolution dans le temps.
 
-Pour ce faire, le rapport qui suit explore différentes questions de recherche centrée sur la production et la consommation d'énergie.
+Pour ce faire, le rapport qui suit explore différentes questions de recherche
+centrée sur la production et la consommation d'énergie.
 
 ## Volet production d'énergie
 
--   L'augmentation de la production d'énergie d'un pays est-elle corrélée avec l'évolution de sa population ?
+-   L'augmentation de la production d'énergie d'un pays est-elle corrélée avec
+    l'évolution de sa population ?
 
--   Y a-t-il un lien entre l'augmentation de la richesse d'un pays et sa production d'énergie fossiles, comme le charbon, le gas et le pétrole ?
+-   Y a-t-il un lien entre l'augmentation de la richesse d'un pays et sa
+    production d'énergie fossiles, comme le charbon, le gas et le pétrole ?
 
 ## Volet consommation d'énergie
 
 -   Comment la consommation d'énergie est-elle répartie entre les pays ?
 
--   De quelles sources d'énergie provient l'électricité du monde et comment la repartition de ces sources a-t-elle évolué dans le temps ?
+-   De quelles sources d'énergie provient l'électricité du monde et comment la
+    repartition de ces sources a-t-elle évolué dans le temps ?
 
     # Sources des données
 
-> Ce projet combine les données sur les émissions de gas à effet de serre @owidco2andothergreenhousegasemissions et l'énergie @owidenergy de la source de données en libre accès [Our World In Data](https://ourworldindata.org/). Ces données sont également combinées, par pays, avec les données de [Gap Minder](https://www.gapminder.org/) sur l'espérance de vie à la naissance @gapminderlifeexpectancyatbirth.
+> Ce projet combine les données sur les émissions de gas à effet de serre
+> @owidco2andothergreenhousegasemissions et l'énergie @owidenergy de la source
+> de données en libre accès [Our World In Data](https://ourworldindata.org/).
+> Ces données sont également combinées, par pays, avec les données de [Gap
+> Minder](https://www.gapminder.org/) sur l'espérance de vie à la naissance
+> @gapminderlifeexpectancyatbirth.
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
 
- library(fs)
- library(lubridate)
- library(readxl)
+library(fs)
+library(lubridate)
+library(readxl)
 library(dplyr)
 ```
 

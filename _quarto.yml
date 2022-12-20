@@ -9,8 +9,8 @@ website:
     l'Université de Montréal donné lors du trimestre A2022."
 
   reader-mode: true
-  site-url: https://alicegaudreau.github.io/FAS1002_projet-final/
-  repo-url: https://github.com/alicegaudreau/FAS1002_projet-final/
+  site-url: https://alicegaudreau.github.io/FAS1002_projet-final/ #verifier si cest le bon lien
+  repo-url: https://github.com/alicegaudreau/FAS1002_projet-final/ #verifier si cest le bon lien
   repo-actions: [edit, issue, source]
   
 # Options à changer pour le menu ou la barre de navigation

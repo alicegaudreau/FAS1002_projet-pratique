@@ -21,8 +21,6 @@ format :
 ---
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
- download.file("https://github.com/FAS1002/A22/raw/main/assets/fichiers/olympic_archive.zip", destfile = "data/raw/olympic_archive.zip")
- 
  library(fs)
  library(lubridate) #dates
  library(tidyverse) #la vie
@@ -42,10 +40,26 @@ Mettre une fonction qui source le document .R avec les données toute propres
 
 ```{r récupérer les données}
 #récupérer les données 
+source("R/helper.R")
+
+URL_Energy <- "https://github.com/owid/energy-data/raw/11fb69e2c83c73d1e964075d711a03fef6262e9a/owid-energy-data.csv"
+    base_path <- file.path("data", "raw")
+    fichier_Energy_du_jour <- paste(today(), "energy-data.csv", sep = "_") #creer le nom de fichier quon veut avec lubridate
+    fpath_Energy <- file.path(base_path, fichier_Energy_du_jour) #creer le path
+
+Energie <- read.csv(file = fpath_Energy)
+
+#telechargement donnees gapminder
+LifeExp <- read.csv(file = 'data/raw/GM-LifeExpectancy-countries-by-year.csv')
 merged_data <- read_csv(file = "data/raw/merged_data.csv", show_col_types = F)
-LifeExp <- read_csv(file = "data/raw/GM-LifeExpectancy-countries-by-year.csv", show_col_types = F)
-LifeExp_test <- gapminder
-#skim(merged_data)
+
+LifeExp$geo <- toupper(LifeExp$geo)
+LifeExp2 <- rename(LifeExp, iso_code = geo, year = time, country = name)
+
+#Mettre Energy et Life Exp ensemble
+merged_data <- dplyr::inner_join(Energie, LifeExp2) %>%
+  arrange(iso_code, year, country)
+
 
 #télécharger un CSV qui associe les codes de pays à des continents. 
 download.file(url = "https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv", destfile = "data/raw/continents.csv") 
@@ -162,24 +176,6 @@ summary(full_db_tibble$year)
 
 ```
 
-### Description des données
-
-Une fois les deux bases de données colligées, il reste 14 211 observations qui sont communes aux deux bases initiales, depuis 1900 et jusqu'à 2021. Toutefois, les données ne sont pas disponibles pour l'ensemble des pays à chaque année. À titre d'exemple, sur les 14 211 observations, il manque 2978 observations de la variable sur la consommation de charbon.
-
-Toutefois, cela n'affecte pas nécessairement l'analyse de données si l'on exclut les valeurs manquantes (voir Graphique 1 plus loin ) ou si l'on se concentre uniquement sur les années pour lesquelles les données sont disponibles (voir Graphique 2 plus loin).
-
-#### Consommation d'énergie
-
-Pour ce qui est de la consommation primaire d'énergie, celle-ci est en moyenne de 701 tera-watt heures dans l'ensemble des données présentées. Parce que certains pays, particulièrement au Nord, ont une consommation d'énergie démesurée des autres, cette mesures n'est pas nécessairement représentation de la consommation pour la planète entière. En effet, la médiane de consommation d'énergie est de seulement 72 tera-watt heures.
-
-Toutefois, comme ces données s'étalent sur plusieurs années, il est intéressant de se concentrer uniquement sur les données les plus récentes, soit celles de 2021. On voit une augmentation marquée de la consommation d'énergie (moyenne de 2118 térawatts et une médiane de 568 térawatt heures) par rapport à sa moyenne des dernières décennies.
-
-#### Production d'énergie
-
-Pour ce qui est de données de production, on constate un très grand nombre de valeurs nulles. En effet, de nombreux pays ne produisent peu ou pas de certains types d'énergie. À ce titre, le premier quartile entier des données sur la production de pétrole, gas et charbon sont des valeurs nulles.
-
-La palme d'or de production de charbon , avec 23 651 terawatt-heures, revient à la Chine en 2021. Pour ce qui est de la production de gas naturel, elle est remportée par les États-Unis, avec 9342 terawatt-heures en 2021. Enfin, celle du pétrole avec 8721 térawatt-heures revient aux États-Unis également en 2019 - sa production ayant baissé depuis. LL'Arabie Saoudie, souvent perçus comme leader mondial en production de pétrole, n'en produit "que" 5989 terawatt-heures.
-
 ```{r stats descriptives}
 
 stats_descriptives <- full_db_tibble %>% 
@@ -273,22 +269,6 @@ kable(synthese2008) #wow, grande différence dans la consommation d'énergie dan
     #group_by(Year, Sex) %>% 
     #summarise(n = n()) %>% #creates new df petit tableau
     #mutate(ratio = n / sum(n)) #creates new col
-
-    
-```
-
-```{r}
-
-# evolution_f <- evolution %>% filter(Sex == "F")
-# evolution_m <- evolution %>% filter(Sex == "M")
-# 
-# ggplot(evolution, aes(x = Year, y = pourcent, color = Sex), ) + geom_line() + geom_point()
-
-#p3 <- ggplot(evolution_f, aes = x = Year, y = pourcent)) + geom_line() + geom_point()
-
-#p4 <- ggplot(evolution_m, aes = x = Year, y = pourcent)) + geom_line() + geom_point()
-
-#p5 <- ggplot() + geom_line(aes = x(evolution_f$Year, y = evolution_f$pourcent))
 ```
 
 ## Consommation d'énergie

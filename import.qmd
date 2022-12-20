@@ -40,12 +40,8 @@ Pour ce faire, le rapport qui suit explore différentes questions de recherche c
 
  library(fs)
  library(lubridate)
- library(tidyverse)
- library(skimr)
- library(purrr)
- library(cronR)
-library(gapminder)
- 
+ library(readxl)
+library(dplyr)
 ```
 
 ```{r download, cache = FALSE}
@@ -78,8 +74,8 @@ library(gapminder)
 
 ```{r importer les donnees}
 #telechargement donnees energie
-source("R/helper.R")
-
+#source("R/helper.R")
+# 
 URL_Energy <- "https://github.com/owid/energy-data/raw/11fb69e2c83c73d1e964075d711a03fef6262e9a/owid-energy-data.csv"
     base_path <- file.path("data", "raw")
     fichier_Energy_du_jour <- paste(today(), "energy-data.csv", sep = "_") #creer le nom de fichier quon veut avec lubridate
@@ -88,11 +84,14 @@ URL_Energy <- "https://github.com/owid/energy-data/raw/11fb69e2c83c73d1e964075d7
 Energie <- read.csv(file = fpath_Energy)
 
 #telechargement donnees gapminder
-LifeExp <- read.csv(file = 'data/raw/GM-LifeExpectancy-countries-by-year.csv')
 
 #J'essaie de telecharger a partir du lien disponible directement dans le google sheets, mais cela ne fonctionne pas car cest le premier tab (info seulement) qui saffiche, et non les donnees
-#download.file("https://docs.google.com/spreadsheets/d/1RheSon1-q4vFc3AGyupVPH6ptEByE-VtnjOCselU0PE/export?format=csv", destfile = 'data/raw/GM-LifeExpectancy-countries-by-year.csv' )
+#download.file("https://docs.google.com/spreadsheets/d/1RheSon1-q4vFc3AGyupVPH6ptEByE-VtnjOCselU0PE/export?format=xlsx", destfile = 'data/raw/GM-LifeExpectancy-countries-by-year.xlsx' )
+
 #LifeExp <- read.csv(file = 'data/raw/GM-LifeExpectancy-countries-by-year.csv')
+
+LifeExp <- read_excel(path ="data/raw/GM-LifeExpectancy-countries-by-year.xlsx", sheet  = 4)
+
 ```
 
 ```{r combinaison}
@@ -104,8 +103,6 @@ LifeExp$geo <- toupper(LifeExp$geo)
 LifeExp2 <- rename(LifeExp, iso_code = geo,
                    year = time, 
                    country = name)
-
-
 
 #Mettre Energy et Life Exp ensemble
 merged_data <- dplyr::inner_join(Energie, LifeExp2) %>%

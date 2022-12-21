@@ -58,7 +58,5 @@ format:
     lang: "fr"
     smooth-scroll: true
 
-execute:
-  freeze: auto
-  
+
 editor: visual

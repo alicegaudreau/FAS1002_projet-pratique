@@ -57,7 +57,7 @@ Sources de données:
 
 ## Comment utiliser ce répertoire
 
-1.  Vous pouvez consulter le rapport final ici.
+1.  Vous pouvez consulter le rapport final ici : https://alicegaudreau.github.io/FAS1002_projet-pratique/
 
 2.  Les pages .qmd contiennent le code des différents onglets du rapport:
 

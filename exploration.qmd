@@ -42,15 +42,21 @@ Mettre une fonction qui source le document .R avec les données toute propres
 #récupérer les données 
 source("R/helper.R")
 
-URL_Energy <- "https://github.com/owid/energy-data/raw/11fb69e2c83c73d1e964075d711a03fef6262e9a/owid-energy-data.csv"
-    base_path <- file.path("data", "raw")
-    fichier_Energy_du_jour <- paste(today(), "energy-data.csv", sep = "_") #creer le nom de fichier quon veut avec lubridate
-    fpath_Energy <- file.path(base_path, fichier_Energy_du_jour) #creer le path
-
-Energie <- read.csv(file = fpath_Energy)
+#recuperer les donnees si la fonction ne fonctionne pas
+# URL_Energy <- "https://github.com/owid/energy-data/raw/11fb69e2c83c73d1e964075d711a03fef6262e9a/owid-energy-data.csv"
+#     base_path <- file.path("data", "raw")
+#     fichier_Energy_du_jour <- paste(today(), "energy-data.csv", sep = "_") #creer le nom de fichier quon veut avec lubridate
+#     fpath_Energy <- file.path(base_path, fichier_Energy_du_jour) #creer le path
+# 
+# Energie <- read.csv(file = fpath_Energy)
 
 #telechargement donnees gapminder
-LifeExp <- read.csv(file = 'data/raw/GM-LifeExpectancy-countries-by-year.csv')
+#telechargement donnees gapminder
+download.file("https://docs.google.com/spreadsheets/d/1RheSon1-q4vFc3AGyupVPH6ptEByE-VtnjOCselU0PE/export?format=xlsx", destfile = 'data/raw/GM-LifeExpectancy-countries-by-year.xlsx' )
+
+LifeExp <- read_excel(path ="data/raw/GM-LifeExpectancy-countries-by-year.xlsx", sheet  = 4) 
+
+#merger les données
 merged_data <- read_csv(file = "data/raw/merged_data.csv", show_col_types = F)
 
 LifeExp$geo <- toupper(LifeExp$geo)
@@ -83,7 +89,7 @@ Ensuite, la variable de PIB a été divisée par la variable de population pour 
 
 Enfin, à des fins d'intérêt général, une nouvelle variable calcule le temps écoulé en jours depuis chaque année pour lesquelles les données sont collectées. Les données les plus anciennes présentent à la fois dans la base de données sur l'espérance de vie @gapminderlifeexpectancyatbirth datent de 1952, soit il y a près de 26 000 jours.
 
-EEn date du 12 décembre 2022, cela faisait très précisément 25 918 jours.
+En date du 12 décembre 2022, cela faisait très précisément 25 918 jours.
 
 </aside>
 
@@ -101,8 +107,7 @@ merged_data_continent <- dplyr::inner_join(merged_data, continents_petit) %>%
 ```
 
 ```{r temps ecoule en jours}
-library(lubridate)
-LifeExDate <- LifeExp %>%
+LifeExDate <- LifeExp2 %>%
 mutate(jour_mois = "-01-01") %>% #ajouter une colonne avec -MM-DD
     unite(year, jour_mois, col = year, sep = "") %>% #combiner les deux colonnes
     mutate(year_as_date = as.Date(year, format = "%Y-%m-%d")) #transformer en format de date
@@ -143,11 +148,13 @@ full_db <- merged_data_continent
 full_db2 <- full_db %>% mutate(gdp_per_capita = (gdp/population))
 ```
 
-## Statistiques descriptives
-
-### Manipulations des données
+## Manipulations des données
 
 En premier lieu, il est nécessaire de vérifier que les données sont stockées correctement afin de pouvoir faire des manipulation à partir de celles-ci. Les manipulations effectuées permettent d'abord de s'assurer que les données sont du bon type (ex : que les chiffres sont interprétés en chiffres (integers)). Dans le cas de cette base de données, les données sont de bonne qualité et peu d'ajustements sont nécessaires.
+
+## Exploration
+
+Le code ci-bas permet d'explorer les données. L'analyse à proprement parler est disponible sur la page d'accueil.
 
 ```{r manip}
 
@@ -157,7 +164,7 @@ full_db_tibble <- as_tibble(full_db2)
 
 #Variables de base
 print(class(full_db_tibble$population)) #numeric ok
-summary(full_db_tibble$Life.expectancy) #numeric ok # les donnees minimum sont vraiment petites. 6 ans, vraiment ?
+summary(full_db_tibble$`Life expectancy`) #numeric ok # les donnees minimum sont vraiment petites. 6 ans, vraiment ?
 summary(full_db_tibble$gdp_per_capita) 
 
 #Conso energie
@@ -179,7 +186,7 @@ summary(full_db_tibble$year)
 ```{r stats descriptives}
 
 stats_descriptives <- full_db_tibble %>% 
-    select(population, Life.expectancy, gdp_per_capita, primary_energy_consumption, oil_production,gas_production,coal_production) %>% 
+    select(population,`Life expectancy`, gdp_per_capita, primary_energy_consumption, oil_production,gas_production,coal_production) %>% 
     pastecs::stat.desc()
 
 kable(stats_descriptives)
@@ -199,286 +206,10 @@ mean(donnees_2021$primary_energy_consumption, na.rm = T)
 median(donnees_2021$primary_energy_consumption, na.rm = T)
 ```
 
-## Analyse de variables
+## Exportation
 
-```{r univarie}
+Les données combinées et manipulées sont disponibles sur GitHub et ici.
 
-synthesegenerale <- full_db_tibble %>%
-    group_by(continent) %>%
-  summarise(
-          count = n(),
-          median_Life_Expectancy = median(Life.expectancy, na.rm = T),
-          median_GDP_per_capita = median(gdp_per_capita, na.rm = T),
-          median_Energy_Consumption = median(primary_energy_consumption, na.rm = T),
-          median_Production_oil = median(oil_production, na.rm = T),
-          median_Production_gas = median(gas_production, na.rm = T),
-          median_Production_Coal = median(coal_production, na.rm = T) )
-    
-    
-#Parce qu'il y a vraiment beaucoup de données, par pays et par année, je vais me concentrer sur les données de 2018 seulement, pour que chaque pays n'ai qu'une entree. Je prends 2018 car  c'est l'année la plus récente pour laquelle les données de GDP sont disponibles. 
-db_2018  <- subset(full_db_tibble, year=='2018') #donnes 2018 seulement
-synthese2018 <- db_2018 %>%
-    group_by(continent) %>%
-  summarise(
-          count = n(), #permet de verifier qu'on a bien les donnees d'une seule année sélectionnée. Ca marche !
-          median_Life_Expectancy = median(Life.expectancy, na.rm = T),
-          median_GDP_per_capita = median(gdp_per_capita, na.rm = T),
-          median_Energy_Consumption = median(primary_energy_consumption, na.rm = T),
-          median_Production_oil = median(oil_production, na.rm = T),
-          median_Production_gas = median(gas_production, na.rm = T),
-          median_Production_Coal = median(coal_production, na.rm = T) )
-
-#Pour le plaisir, comparons avec les données de 2008 puisqu'il y avait une crise économique a ce moment
-db_2008  <- subset(full_db_tibble, year=='2008') #donnes 2018 seulement
-synthese2008 <- db_2008 %>%
-    group_by(continent) %>%
-  summarise(
-          count = n(), #permet de verifier qu'on a bien les donnees d'une seule année sélectionnée. Ca marche !
-          median_Life_Expectancy = median(Life.expectancy, na.rm = T),
-          median_GDP_per_capita = median(gdp_per_capita, na.rm = T),
-          median_Energy_Consumption = median(primary_energy_consumption, na.rm = T),
-          median_Production_oil = median(oil_production, na.rm = T),
-          median_Production_gas = median(gas_production, na.rm = T),
-          median_Production_Coal = median(coal_production, na.rm = T) )
-
-#Ayant recu un message derreur avec ma kable, je revise ses settings.
-options(knitr.table.format = function() {
-  if (knitr::is_latex_output())
-    "latex" else "pipe"
-})
-
-
-
-#Essai 1 - napparait pas 
-# kable(synthese2022, format = "latex", booktabs = T) %>% 
-#   kable_styling(latex_options = "striped")
-
-# #Essai 2 - ok mais la typo est laide
-kable(synthesegenerale)
-kable(synthese2018)
-kable(synthese2008) #wow, grande différence dans la consommation d'énergie dans les Amériques !
-
-
-#full_db_tibble %>% energy_per_gdp %>% 
-    # group_by(iso_code, country, year, energy_per_gdp) %>% 
-    # summarise()
-
-
-#on regroupe par genre
-#evolution <- df %>% 
-    #group_by(Year, Sex) %>% 
-    #summarise(n = n()) %>% #creates new df petit tableau
-    #mutate(ratio = n / sum(n)) #creates new col
-```
-
-## Consommation d'énergie
-
-### Consommation d'énergie et population
-
-Existe-t-il un lien entre l'aumentation de la population d'un pays et sa consommation d'énergie ? Nous pourrions être tenté de croire que c'est le cas et qu'avec une population qui augmente, la consommation d'énergie augmente aussi.
-
-Toutefois, comme on peut le voir dans le graphique ci-bas, bien que la population ait augmenté pour la majorité des pays représentés, la consommation d'énergie n'augmente pas de manière proportionnelle.
-
-Au lieu de cela, on voit certains joueurs (les États-Unis, la Chine, la Russie et l'Inde) se démarquer tout particulièrement avec une consommation d'énergie qui augmente de façon exponentielle. En comparaison, plusieurs pays de l'Asie de l'Est (Pakistan, Bangladesh, Philippines, pour ne nommer que ceux-là) ont vu leur population augmenter considérablement depuis 1965, mais dont la consommation d'énergie est restée stable ou a augmenté d'une moindre mesure.
-
-```{r Graphique 1 - Consommation denergie, message=FALSE, warning=FALSE}
-library(plotly)
-library(gapminder)
-
-
-G1_Fossil_Consumption <- full_db_tibble %>%
-  plot_ly(
-    x = ~ population, 
-    y = ~ fossil_fuel_consumption,
-    color = ~ continent,
-    frame = ~ year,
-    text = ~ country,
-    na.rm = TRUE,
-    hoverinfo = "text",
-    type = 'scatter',
-    mode = 'markers',
-    width = "100%",
-    height = 600
-  )
-
-G1_Fossil_Consumption <- G1_Fossil_Consumption %>% 
-    layout(xaxis = list(type = "log")) %>%
-    animation_button(
-    x = 0, xanchor = "left", y = -0.15, yanchor = "bottom")
-G1_Fossil_Consumption
-```
-
-------------------------------------------------------------------------
-
-### Type d'énergie consommé au fil du temps
-
-```{r Graphique 2 - Types denergie}
-
-
-# hydro_share_elec
-# gas_share_elec
-# nuclear_share_elec
-# oil_share_elec
-# other_renewables_share_elec
-
-
-#Canada
-donnees_Canada  <- subset(full_db_tibble, iso_code=='CAN') %>%
-    select (year, coal_share_elec, oil_share_elec, gas_share_elec, nuclear_share_elec, biofuel_share_elec, hydro_share_elec, solar_share_elec, wind_share_elec, other_renewables_share_elec_exc_biofuel) %>% #petit tableau avec les variables dinteret
-    pivot_longer(cols = coal_share_elec:other_renewables_share_elec_exc_biofuel, names_to = "type_energy", values_drop_na = T) %>%  #pour que le type denergie devienne une donnee et non une variable
-    mutate(type_electricite = recode(type_energy, 
-          "hydro_share_elec" = "6 - hydro",
-          "gas_share_elec" = "3 - gaz",
-          "biofuel_share_elec" = "5 - biocarburants",
-          "nuclear_share_elec" = "4 - nucléaire",
-          "oil_share_elec" = "2 - pétrole",
-          "solar_share_elec" = "7 - solaire",
-          "wind_share_elec" = "8 - éolienne",
-          "coal_share_elec" = "1 - charbon",
-          "other_renewables_share_elec_exc_biofuel" = "9 - autres énergies renouvelables"))
-
-
-G2a_Energy_Share_Canada <- ggplot(data = donnees_Canada) + geom_area(mapping = aes(x = year, y= value, na.rm=T, fill = type_electricite)) +
-  labs(title = "Graphique 2a. Évolution du type \nd'électricité consommé au Canada",subtitle = "Données de 1985 à 2021", x = "Année", y = "pourcentage d'électricité") +
-  theme(text = element_text(family = "Calibri"),
-        plot.margin = unit(c(1,1,1,1), "cm"),
-    plot.title = element_text(size = 12, hjust = 0.5, line = 0.8),
-        plot.subtitle = element_text(size =8, hjust = 1, line = 0.8),
-        axis.text.x = element_text(size = 8),
-        axis.text.y = element_text(size = 8)) + 
-    scale_colour_brewer(type = "seq", palette = "Spectral") +
-    guides(fill = guide_legend(title = "Type d'électricité"))
-
-G2a_Energy_Share_Canada
-ggsave(path = "figures", filename = "G2a_Energy_Share_Canada.png")
-
-
-#USA
-
-donnees_USA  <- subset(full_db_tibble, iso_code=='USA') %>%
-    select (year, coal_share_elec, oil_share_elec, gas_share_elec, nuclear_share_elec, biofuel_share_elec, hydro_share_elec, solar_share_elec, wind_share_elec, other_renewables_share_elec_exc_biofuel) %>% #petit tableau avec les variables dinteret
-    pivot_longer(cols = coal_share_elec:other_renewables_share_elec_exc_biofuel, names_to = "type_energy", values_drop_na = T) %>%  #pour que le type denergie devienne une donnee et non une variable
-    mutate(type_electricite = recode(type_energy, 
-          "hydro_share_elec" = "6 - hydro",
-          "gas_share_elec" = "3 - gaz",
-          "biofuel_share_elec" = "5 - biocarburants",
-          "nuclear_share_elec" = "4 - nucléaire",
-          "oil_share_elec" = "2 - pétrole",
-          "solar_share_elec" = "7 - solaire",
-          "wind_share_elec" = "8 - éolienne",
-          "coal_share_elec" = "1 - charbon",
-          "other_renewables_share_elec_exc_biofuel" = "9 - autres énergies renouvelables"))
-
-
-G2b_Energy_Share_USA <- ggplot(data = donnees_USA) + geom_area(mapping = aes(x = year, y= value, na.rm=T, fill = type_electricite)) +
-  labs(title = "Graphique 2b. Évolution du type \nd'électricité consommé au États-Unis",subtitle = "Données de 1985 à 2021", x = "Année", y = "pourcentage d'électricité") +
-  theme(text = element_text(family = "Calibri"),
-        plot.margin = unit(c(1,1,1,1), "cm"),
-    plot.title = element_text(size = 12, hjust = 0.5, line = 0.8),
-        plot.subtitle = element_text(size =8, hjust = 1, line = 0.8),
-        axis.text.x = element_text(size = 8),
-        axis.text.y = element_text(size = 8)) + 
-    scale_colour_brewer(type = "seq", palette = "Spectral") +
-    guides(fill = guide_legend(title = "Type d'électricité"))
-
-G2b_Energy_Share_USA
-ggsave(path = "figures", filename = "G2b_Energy_Share_USA.png")
-
-
-#China
-
-donnees_Chine  <- subset(full_db_tibble, iso_code=='CHN') %>%
-    select (year, coal_share_elec, oil_share_elec, gas_share_elec, nuclear_share_elec, biofuel_share_elec, hydro_share_elec, solar_share_elec, wind_share_elec, other_renewables_share_elec_exc_biofuel) %>% #petit tableau avec les variables dinteret
-    pivot_longer(cols = coal_share_elec:other_renewables_share_elec_exc_biofuel, names_to = "type_energy", values_drop_na = T) %>%  #pour que le type denergie devienne une donnee et non une variable
-    mutate(type_electricite = recode(type_energy, 
-          "hydro_share_elec" = "6 - hydro",
-          "gas_share_elec" = "3 - gaz",
-          "biofuel_share_elec" = "5 - biocarburants",
-          "nuclear_share_elec" = "4 - nucléaire",
-          "oil_share_elec" = "2 - pétrole",
-          "solar_share_elec" = "7 - solaire",
-          "wind_share_elec" = "8 - éolienne",
-          "coal_share_elec" = "1 - charbon",
-          "other_renewables_share_elec_exc_biofuel" = "9 - autres énergies renouvelables"))
-
-
-G2c_Energy_Share_Chine <- ggplot(data = donnees_Chine) + geom_area(mapping = aes(x = year, y= value, na.rm=T, fill = type_electricite, position="fill")) +
-  labs(title = "Graphique 2c. Évolution du type \nd'électricité consommé en Chine",subtitle = "Données de 1985 à 2021", x = "Année", y = "pourcentage d'électricité") +
-  theme(text = element_text(family = "Calibri"),
-        plot.margin = unit(c(1,1,1,1), "cm"),
-    plot.title = element_text(size = 12, hjust = 0.5, line = 0.8),
-        plot.subtitle = element_text(size =8, hjust = 1, line = 0.8),
-        axis.text.x = element_text(size = 8),
-        axis.text.y = element_text(size = 8)) + 
-    scale_colour_brewer(type = "seq", palette = "Spectral") +
-    guides(fill = guide_legend(title = "Type d'électricité"))
-
-G2c_Energy_Share_Chine
-ggsave(path = "figures", filename = "G2c_Energy_Share_Chine.png")
-
-#Inde
-
-
-donnees_Inde  <- subset(full_db_tibble, iso_code=='IND') %>%
-    select (year, coal_share_elec, oil_share_elec, gas_share_elec, nuclear_share_elec, biofuel_share_elec, hydro_share_elec, solar_share_elec, wind_share_elec, other_renewables_share_elec_exc_biofuel) %>% #petit tableau avec les variables dinteret
-    pivot_longer(cols = coal_share_elec:other_renewables_share_elec_exc_biofuel, names_to = "type_energy", values_drop_na = T) %>%  #pour que le type denergie devienne une donnee et non une variable
-    mutate(type_electricite = recode(type_energy, 
-          "hydro_share_elec" = "6 - hydro",
-          "gas_share_elec" = "3 - gaz",
-          "biofuel_share_elec" = "5 - biocarburants",
-          "nuclear_share_elec" = "4 - nucléaire",
-          "oil_share_elec" = "2 - pétrole",
-          "solar_share_elec" = "7 - solaire",
-          "wind_share_elec" = "8 - éolienne",
-          "coal_share_elec" = "1 - charbon",
-          "other_renewables_share_elec_exc_biofuel" = "9 - autres énergies renouvelables"))
-
-
-G2d_Energy_Share_Inde <- ggplot(data = donnees_Inde) + geom_area(mapping = aes(x = year, y= value, na.rm=T, fill = type_electricite)) +
-  labs(title = "Graphique 2d. Évolution du type \nd'électricité consommé en Inde",subtitle = "Données de 1985 à 2021", x = "Année", y = "pourcentage d'électricité") +
-  theme(text = element_text(family = "Calibri"),
-        plot.margin = unit(c(1,1,1,1), "cm"),
-    plot.title = element_text(size = 12, hjust = 0.5, line = 0.8),
-        plot.subtitle = element_text(size =8, hjust = 1, line = 0.8),
-        axis.text.x = element_text(size = 8),
-        axis.text.y = element_text(size = 8)) + 
-    scale_colour_brewer(type = "seq", palette = "Spectral") +
-    guides(fill = guide_legend(title = "Type d'électricité"))
-
-G2d_Energy_Share_Inde
-ggsave(path = "figures", filename = "G2d_Energy_Share_Inde.png")
-
-
-#Inde
-
-
-donnees_Norvege <- subset(full_db_tibble, iso_code=='NOR') %>%
-    select (year, coal_share_elec, oil_share_elec, gas_share_elec, nuclear_share_elec, biofuel_share_elec, hydro_share_elec, solar_share_elec, wind_share_elec, other_renewables_share_elec_exc_biofuel) %>% #petit tableau avec les variables dinteret
-    pivot_longer(cols = coal_share_elec:other_renewables_share_elec_exc_biofuel, names_to = "type_energy", values_drop_na = T) %>%  #pour que le type denergie devienne une donnee et non une variable
-    mutate(type_electricite = recode(type_energy, 
-          "hydro_share_elec" = "6 - hydro",
-          "gas_share_elec" = "3 - gaz",
-          "biofuel_share_elec" = "5 - biocarburants",
-          "nuclear_share_elec" = "4 - nucléaire",
-          "oil_share_elec" = "2 - pétrole",
-          "solar_share_elec" = "7 - solaire",
-          "wind_share_elec" = "8 - éolienne",
-          "coal_share_elec" = "1 - charbon",
-          "other_renewables_share_elec_exc_biofuel" = "9 - autres énergies renouvelables"))
-
-
-G2e_Energy_Share_Norvege <- ggplot(data = donnees_Norvege) + geom_area(mapping = aes(x = year, y= value, na.rm=T, fill = type_electricite)) +
-  labs(title = "Graphique 2e. Évolution du type \nd'électricité consommé en Norvège",subtitle = "Données de 1985 à 2021", x = "Année", y = "pourcentage d'électricité") +
-  theme(text = element_text(family = "Calibri"),
-        plot.margin = unit(c(1,1,1,1), "cm"),
-    plot.title = element_text(size = 12, hjust = 0.5, line = 0.8),
-        plot.subtitle = element_text(size =8, hjust = 1, line = 0.8),
-        axis.text.x = element_text(size = 8),
-        axis.text.y = element_text(size = 8)) + 
-    scale_colour_brewer(type = "seq", palette = "Spectral") +
-    guides(fill = guide_legend(title = "Type d'électricité"))
-
-G2e_Energy_Share_Norvege
-ggsave(path = "figures", filename = "G2e_Energy_Share_Norvege.png")
-
+```{r exportation}
+write_csv(full_db_tibble,file = "data/processed/full_database_combined.csv")
 ```

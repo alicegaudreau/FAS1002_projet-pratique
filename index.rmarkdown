@@ -2,7 +2,7 @@
 title: "Rapport"
 title-block-banner: false
 description: | 
-  Cette page est ue synthèse des analyses de données réalisées et comprend également les graphiques.  
+  Cette page est une synthèse des analyses de données réalisées et comprend également les graphiques.  
 author:
   - name: "Alice Gaudreau"
     url: https://github.com/alicegaudreau
@@ -55,6 +55,7 @@ download.file("https://docs.google.com/spreadsheets/d/1RheSon1-q4vFc3AGyupVPH6pt
 
 LifeExp <- read_excel(path ="data/raw/GM-LifeExpectancy-countries-by-year.xlsx", sheet  = 4) 
 
+#merging des données
 merged_data <- read_csv(file = "data/raw/merged_data.csv", show_col_types = F)
 LifeExp$geo <- toupper(LifeExp$geo)
 LifeExp2 <- rename(LifeExp, iso_code = geo, year = time, country = name)
@@ -77,35 +78,6 @@ full_db2 <- full_db %>% mutate(gdp_per_capita = (gdp/population))
 
 
 ## Statistiques descriptives
-
-
-```{r manip, echo = FALSE}
-
-
-#transformer en tibble
-full_db_tibble <- as_tibble(full_db2)
-
-#Variables de base
-print(class(full_db_tibble$population)) #numeric ok
-summary(full_db_tibble$`Life expectancy`) #numeric ok # les donnees minimum sont vraiment petites. 6 ans, vraiment ?
-summary(full_db_tibble$gdp_per_capita) 
-
-#Conso energie
-summary(full_db_tibble$primary_energy_consumption) #il y a un zero, c'est bizarre. Je vais cibler les données de pays ayant des données complètes. 
-
-#Prod energie
-summary(full_db_tibble$oil_prod_per_capita)
-summary(full_db_tibble$gas_prod_per_capita)
-summary(full_db_tibble$coal_prod_per_capita)
-summary(full_db_tibble$oil_production)
-summary(full_db_tibble$gas_production) #bon, vu que je regarde l"ensemble des donnees de differentes annees de production, la mediane est vraiment basse par rapport au maximum. Pour mes tableaux descriptifs, je vais me concentrer sur des annees en particulier. 
-summary(full_db_tibble$coal_production)
-summary(full_db_tibble$year)
-
-
-
-```
-
 
 ### Description des données
 
@@ -152,9 +124,9 @@ median(donnees_2021$primary_energy_consumption, na.rm = T)
 
 ## Analyse de variables
 
-En analysant les données les plus récentes (2018) par continent, on constate une grande disparité de richesse et de consommation d'énergie. La médiane montre une richesse nettement plus élevée en Océanie et en Europe - ces deux continents étant toutefois aux antipodes en termes d'l'espérance de vie la plus élevée. Alors que l'Océanie a le PIB le plus élevé par habitant ( 42 900 \$), l'espérance de vie médiane de ce continent est de seulement 68 ans, comparativement à 81 ans pour l'Europe.
+En analysant les données les plus récentes (2018) par continent, on constate une grande disparité de richesse et de consommation d'énergie. D'abord le portrait de l'Afrique montre le PIB par haibtant le plus faible de tous les continents à seulement 2877 \$. La médiane montre une richesse nettement plus élevée en Océanie et en Europe - ces deux continents étant toutefois aux antipodes en termes d'l'espérance de vie la plus élevée. Alors que l'Océanie a le PIB le plus élevé par habitant ( 42 900 \$), l'espérance de vie médiane de ce continent est de seulement 68 ans, comparativement à 81 ans pour l'Europe.
 
-La consommation d'énergie par personne semble toutefois présenter une corrélatoin plus intéressante avec l'espérance de vie. En effet, les deux continents ayant une espérance de vie plus faible, soit l'Afrique (59 ans) et l'Océanie (68 ans) sont également les deux seuls avec la consommation d'énergie par personne la plus basse, soit 5230 kilowatt-heures et 1947 kilowatt-heures respectivement, tandis que les autres continents dépassent tous la barre du 10 000 kilowatt-heures.
+La consommation d'énergie par personne semble toutefois présenter une corrélatoin plus intéressante avec l'espérance de vie. En effet, les deux continents ayant une espérance de vie plus faible, soit l'Afrique (59 ans) et l'Océanie (68 ans) sont également les deux seuls avec la consommation d'énergie par personne la plus basse, soit 5218 kilowatt-heures et 2276 kilowatt-heures respectivement, tandis que les autres continents dépassent tous la barre du 10 000 kilowatt-heures.
 
 Ces deux continents arrivent également en queue de peloton en ce qui a trait à la production d'énergie - ici uniquement les énergies fossies du pétrole, du charbon et du gas-. C'est l'Asie qui arrive en tête de file pour les trois énergies étudiées, bien que cela ne semble pas tirer vers le haut son bilan médian pour ce qui est du PIB par habitant, laissant croire que quelques pays ont une production qui leur permet de s'enrichir, sans que ce soit le cas de la majorité des pays d'Asie.
 
@@ -214,7 +186,7 @@ options(knitr.table.format = function() {
 # #Essai 2 - ok mais la typo est laide
 kable(synthesegenerale)
 kable(synthese2018)
-kable(synthese2008) #wow, grande différence dans la consommation d'énergie dans les Amériques !
+#kable(synthese2008) #wow, grande différence dans la consommation d'énergie dans les Amériques !
 
 
 #full_db_tibble %>% energy_per_gdp %>% 

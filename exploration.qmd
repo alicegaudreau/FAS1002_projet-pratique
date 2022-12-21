@@ -208,7 +208,7 @@ median(donnees_2021$primary_energy_consumption, na.rm = T)
 
 ## Exportation
 
-Les données combinées et manipulées sont disponibles sur GitHub et ici.
+Les données combinées et manipulées sont disponibles sur [GitHub](https://github.com/alicegaudreau/FAS1002_projet-pratique/raw/main/data/processed/full_database_combined.csv).
 
 ```{r exportation}
 write_csv(full_db_tibble,file = "data/processed/full_database_combined.csv")

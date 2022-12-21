@@ -1,60 +1,24 @@
-# FAS1002_projet-final
+# FAS1002 Projet final d'Alice Gaudreau
 
-[![](https://img.shields.io/badge/Licence-CC%20BY--SA%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-sa/4.0/deed.fr)
+Ce répertoire est le rapport fonctionnel remis pour le projet final du cours [FAS1002 - Initiation à la programmation en sciences sociales](https://admission.umontreal.ca/cours-et-horaires/cours/fas-1002/) qui est offert dans le cadre du [Microprogramme de 1er cycle en analyse des mégadonnées en sciences humaines et sociales](https://admission.umontreal.ca/programmes/microprogramme-de-1er-cycle-en-analyse-des-megadonnees-en-sciences-humaines-et-sociales/structure-du-programme/).
 
-Ce répertoire se veut exemple typique d'un rapport fonctionnel à remettre pour
-le projet final du cours [FAS1002 - Initiation à la programmation en sciences
-sociales](https://admission.umontreal.ca/cours-et-horaires/cours/fas-1002/) qui
-est offert dans le cadre du [Microprogramme de 1er cycle en analyse des
-mégadonnées en sciences humaines et
-sociales](https://admission.umontreal.ca/programmes/microprogramme-de-1er-cycle-en-analyse-des-megadonnees-en-sciences-humaines-et-sociales/structure-du-programme/).
-Par le fait même, ce répertoire est aide en indiquant aux étudiant.e.s permet
-aux étudiant.e.s qui doivent construire un rapport de toute pièce les éléments
-à changer en plus d'offrir une structure relativement de base. Il manque
-certains dossiers cruciaux, mais ils n'y sont pas à des fins éducatives!
+## Présentation du rapport
 
-## Instructions
+Ce rapport utilise les données de Gapminder sur l'espérance de vie et celles de Our World In Data sur la consommation d'énergie dans le monde. Il présente des facteurs ayant une influence sur l'espérance de vie et propose une analyse de la consommation d'énergie dans le temps et selon le type d'énergie.
 
-1.  Pour démarrer avec ce répertoire, vous n'avez qu'à *fork* ce répertoire.
+Sources de données:
 
-    -   Assurez-vous de copier toutes les branches en **décochant** "Copy the
-        `main` branch only"
+1.  Gapminder est un organisme à but non lucratif indépendant qui offre ses données en libre accès afin de lutter contre la désinformation.
 
-    -   ![](/assets/img/copy_all_branches.png)
+2.  Our World With Data est une organisation affiliée à l'Université d'Oxford qui offre également ses données en libre accès afin de contribuer à des enjeux de société mondiaux.
 
-2.  Ensuite, vous devez activer *GitHub Pages* dans les settings et choisir la
-    *Deploy from a branch* (`gh-pages`). Il faudra que vous fassiez un premier
-    commit pour que le site web apparaisse pour la première fois. La page
-    devrait se trouver à
-    **`https://VOTREUSERNAME.github.io/VOTRE-REPERTOIRE/`**.
-
-3.  N'oubliez pas de modifier votre section `About` en haut à droite de votre
-    répertoire pour faciliter la visite de votre site web.
-
-4.  Pour commencer à coder le plus rapidement, le plus simple est d'importer le
-    répertoire à travers les menus de RStudio en créant un nouveau
-    `Project >  Version Control > votre répertoire`.
-
-    1.  Pour les plus téméraires, vous pouvez
-        `git clone https://github.com/USERNAME/votre-repertoire` à partir de
-        votre terminal.
-    2.  N'oubliez pas de *commit* périodiquement en tenant compte de la
-        fonctionnalité de vos ajouts. Je vous invite à révisiter le guide
-        [GitHub
-        flow](https://docs.github.com/en/get-started/quickstart/github-flow)
-        pour en apprendre davantage.
-
-5.  Enfin, pour mettre à jour votre site web, la façon le plus simple est de
-    *render* votre site votre site localement (sur votre ordinateur) en
-    cliquant sur `Render Website`. Il vous faudra *commit* vos changements,
-    surtout le dossier `_freeze/` et de *push* le tout sur GitHub.
-
-## Structure du répertoire
+    ## Structure du répertoire
 
 ``` bash
 ├── 404.qmd
 ├── a-propos.qmd
 ├── assets
+│   ├── FAS1002-A22_travail-final_v1.pdf
 │   ├── img
 │   │   └── FAS1002.png
 │   └── scss
@@ -62,10 +26,20 @@ certains dossiers cruciaux, mais ils n'y sont pas à des fins éducatives!
 │       └── styles-dark.scss
 ├── data
 │   ├── processed
+│       ├── full_database_combined.csv
 │   └── raw
+│       ├── 2022-12-21_energy-data.csv
+│       ├── continents.csv
+│       ├── GM-LifeExpectancy-countries-by-year.csv
+│       ├── merged_data.csv
 ├── exploration.qmd
 ├── FAS1002_projet-final.Rproj
 ├── figures
+│   ├── G2a_Energy_Share_Canada.png
+│   ├── G2b_Energy_Share_USA.png
+│   ├── G2c_Energy_Share_Chine.png
+│   ├── G2d_Energy_Share_Inde.png
+│   ├── G2e_Energy_Share_Norvege.png
 ├── _freeze
 │   └── ...
 │      └── contenu des computations
@@ -81,42 +55,26 @@ certains dossiers cruciaux, mais ils n'y sont pas à des fins éducatives!
 33 directories, 46 files
 ```
 
-La quasi-totalité les fichiers seront amenés à être modifiés; ils ne sont que
-des exemples très, très brefs. Ceux-ci constituent la base de votre rapport.
-Vous pouvez les nommer et les utiliser comme vous les voulez. Ainsi, vous
-pourrez diviser en différentes parties le processus d'analyses de façons
-stratégiques au lieu d'avoir un seul document avec des milliers de lignes. Le
-nombre est également arbitraire, à vous de décider la quantité qui vous
-convient.
+## Comment utiliser ce répertoire
 
-Pour plus de détails sur la structure et les modifications possibles en
-fonction des fichiers, veuillez consulter le site web de
-[quarto](https://quarto.org). Tout y est pour modifier le look, ajouter des
-fonctionnalités, etc.
+1.  Vous pouvez consulter le rapport final ici.
 
-## Principaux packages R utilisés dans ce site qui sert d'exemple:
+2.  Les pages .qmd contiennent le code des différents onglets du rapport:
 
--   R Core Team (2020). R: A language and environment for statistical
-    computing. R Foundation for Statistical Computing, Vienna, Austria.
-    <https://www.R-project.org/>
+    1.  La page *index* est la page d'accueil et elle comprend les analyses principales.
 
--   H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag
-    New York, 2016. <https://ggplot2.tidyverse.org>
+    2.  La page *import* agit en soutien en donnant les manipulations relatives au téléchargement des données et à l'exportation des données manipulées
 
--   Joe Cheng, Bhaskar Karambelkar and Yihui Xie (2021). leaflet: Create
-    Interactive Web Maps with the JavaScript 'Leaflet' Library. R package
-    version 2.0.4.1. <https://CRAN.R-project.org/package=leaflet>
+    3.  La page *exploration* comprend le codes pour les ébauches d'analyse descriptives et de variables. Elle ne contient pas d'analyses à proprement parler.
 
--   C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and
-    shiny. Chapman and Hall/CRC. Florida, 2020. <https://plotly-r.com>
+    4.  La page *introduction* est une introduction (et cette phrase est un pléonasme).
 
--   Jennifer Bryan (2017). gapminder: Data from Gapminder. R package version
-    0.3.0. <https://CRAN.R-project.org/package=gapminder>
+3.  Le dossier *data* comprend les données telles que téléchargées (*raw*) et après manipulations (*processed*).
+
+4.  Le dossier figures comprend les différentes versions du Graphique 2 sur le type d'énergie dont est issue l'électricité dans certains pays.
 
 ## Licence
 
-Cette œuvre est mise à disposition selon les termes de la [licence Creative
-Commons Attribution - Partage dans les Mêmes Conditions 4.0
-International](http://creativecommons.org/licenses/by-sa/4.0/deed.fr).
+Cette œuvre est mise à disposition selon les termes de la [licence Creative Commons Attribution - Partage dans les Mêmes Conditions 4.0 International](http://creativecommons.org/licenses/by-sa/4.0/deed.fr).
 
 [![](https://licensebuttons.net/l/by-sa/4.0/88x31.png)](http://creativecommons.org/licenses/by-sa/4.0/deed.fr)

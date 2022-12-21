@@ -35,7 +35,11 @@ library(readxl) #lire donnees gapminder
 
 # Rapport sur l'évolution de la consommation d'énergie dans le monde
 
-Ce rapport
+Ce rapport utilise les données de @gapminderlifeexpectancyatbirth et de @owidenergy afin d'étudier l'évolution de la consommation d'énergie dans le monde.
+
+[Gapminder](https://www.gapminder.org/) est un organisme à but non lucratif indépendant qui offre ses données en libre accès afin de lutter contre la désinformation.
+
+Quant à [Our World With Data](https://ourworldindata.org/), il s'agit d'une organisation affiliée à l'Université d'Oxford qui offre également ses données en libre accès afin de contribuer à des enjeux de société mondiaux.
 
 ```{r récupérer les données, echo=FALSE}
 #récupérer les données {r récupérer les données}
@@ -117,7 +121,7 @@ mean(donnees_2021$primary_energy_consumption, na.rm = T)
 median(donnees_2021$primary_energy_consumption, na.rm = T)
 ```
 
-## Analyse de variables
+## Portrait selon les continents
 
 En analysant les données les plus récentes (2018) par continent, on constate une grande disparité de richesse et de consommation d'énergie. D'abord le portrait de l'Afrique montre le PIB par haibtant le plus faible de tous les continents à seulement 2877 \$. La médiane montre une richesse nettement plus élevée en Océanie et en Europe - ces deux continents étant toutefois aux antipodes en termes d'l'espérance de vie la plus élevée. Alors que l'Océanie a le PIB le plus élevé par habitant ( 42 900 \$), l'espérance de vie médiane de ce continent est de seulement 68 ans, comparativement à 81 ans pour l'Europe.
 
@@ -197,7 +201,7 @@ kable(synthese2018)
 
 ## Consommation d'énergie
 
-### Consommation d'énergie et population
+### I. Consommation d'énergie et population
 
 Existe-t-il un lien entre l'aumentation de la population d'un pays et sa consommation d'énergie ? Nous pourrions être tenté de croire que c'est le cas et qu'avec une population qui augmente, la consommation d'énergie augmente aussi.
 
@@ -234,7 +238,7 @@ G1_Fossil_Consumption
 
 ------------------------------------------------------------------------
 
-### Type d'énergie utilisée pour l'électricité consommée au fil du temps
+### II. Type d'énergie utilisée pour l'électricité consommée au fil du temps
 
 En plus d'une variation importante de la quantité d'énergie consommée, il y a également une grande disparité de sortes d'énergie consommée dans les différents pays du monde. Au-delà de la consommation d'énergies fossiles, les pays utilisent un éventail de types d'énergie afin de répondre aux besoins toujours croissants de leur population.
 

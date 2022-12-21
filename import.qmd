@@ -86,9 +86,7 @@ Energie <- read.csv(file = fpath_Energy)
 #telechargement donnees gapminder
 
 #J'essaie de telecharger a partir du lien disponible directement dans le google sheets, mais cela ne fonctionne pas car cest le premier tab (info seulement) qui saffiche, et non les donnees
-#download.file("https://docs.google.com/spreadsheets/d/1RheSon1-q4vFc3AGyupVPH6ptEByE-VtnjOCselU0PE/export?format=xlsx", destfile = 'data/raw/GM-LifeExpectancy-countries-by-year.xlsx' )
-
-#LifeExp <- read.csv(file = 'data/raw/GM-LifeExpectancy-countries-by-year.csv')
+download.file("https://docs.google.com/spreadsheets/d/1RheSon1-q4vFc3AGyupVPH6ptEByE-VtnjOCselU0PE/export?format=xlsx", destfile = 'data/raw/GM-LifeExpectancy-countries-by-year.xlsx' )
 
 LifeExp <- read_excel(path ="data/raw/GM-LifeExpectancy-countries-by-year.xlsx", sheet  = 4)
 

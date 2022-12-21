@@ -24,6 +24,7 @@ format :
  library(fs)
  library(lubridate) #dates
  library(tidyverse) #la vie
+library(readxl) #lire donnees gapminder
  library(skimr) #regarder donnees
  library(ggplot2) #graphiques
  library(kableExtra) #tableau
@@ -32,11 +33,9 @@ format :
  library(ggridges) #pour faires des stacked density plots
 ```
 
-# Exploration des données
+# Rapport sur l'évolution de la consommation d'énergie dans le monde
 
-## Réimporter les données
-
-Mettre une fonction qui source le document .R avec les données toute propres
+Ce rapport
 
 ```{r récupérer les données, echo=FALSE}
 #récupérer les données {r récupérer les données}
@@ -50,7 +49,10 @@ URL_Energy <- "https://github.com/owid/energy-data/raw/11fb69e2c83c73d1e964075d7
 Energie <- read.csv(file = fpath_Energy)
 
 #telechargement donnees gapminder
-LifeExp <- read.csv(file = 'data/raw/GM-LifeExpectancy-countries-by-year.csv')
+download.file("https://docs.google.com/spreadsheets/d/1RheSon1-q4vFc3AGyupVPH6ptEByE-VtnjOCselU0PE/export?format=xlsx", destfile = 'data/raw/GM-LifeExpectancy-countries-by-year.xlsx' )
+
+LifeExp <- read_excel(path ="data/raw/GM-LifeExpectancy-countries-by-year.xlsx", sheet  = 4) 
+
 merged_data <- read_csv(file = "data/raw/merged_data.csv", show_col_types = F)
 LifeExp$geo <- toupper(LifeExp$geo)
 LifeExp2 <- rename(LifeExp, iso_code = geo, year = time, country = name)
@@ -73,7 +75,7 @@ full_db2 <- full_db %>% mutate(gdp_per_capita = (gdp/population))
 
 ## Statistiques descriptives
 
-```{r manip}
+```{r manip, echo = FALSE}
 
 
 #transformer en tibble
@@ -81,7 +83,7 @@ full_db_tibble <- as_tibble(full_db2)
 
 #Variables de base
 print(class(full_db_tibble$population)) #numeric ok
-summary(full_db_tibble$Life.expectancy) #numeric ok # les donnees minimum sont vraiment petites. 6 ans, vraiment ?
+summary(full_db_tibble$`Life expectancy`) #numeric ok # les donnees minimum sont vraiment petites. 6 ans, vraiment ?
 summary(full_db_tibble$gdp_per_capita) 
 
 #Conso energie
@@ -121,7 +123,7 @@ La palme d'or de production de charbon , avec 23 651 terawatt-heures, revient à
 ```{r stats descriptives}
 
 stats_descriptives <- full_db_tibble %>% 
-    select(population, Life.expectancy, gdp_per_capita, primary_energy_consumption, oil_production,gas_production,coal_production) %>% 
+    select(population, `Life expectancy`, gdp_per_capita, primary_energy_consumption, oil_production,gas_production,coal_production) %>% 
     pastecs::stat.desc()
 
 kable(stats_descriptives)
@@ -143,19 +145,25 @@ median(donnees_2021$primary_energy_consumption, na.rm = T)
 
 ## Analyse de variables
 
-```{r univarie}
+En analysant les données les plus récentes (2018) par continent, on constate une grande disparité de richesse et de consommation d'énergie. La médiane montre une richesse nettement plus élevée en Océanie et en Europe - ces deux continents étant toutefois aux antipodes en termes d'l'espérance de vie la plus élevée. Alors que l'Océanie a le PIB le plus élevé par habitant ( 42 900 \$), l'espérance de vie médiane de ce continent est de seulement 68 ans, comparativement à 81 ans pour l'Europe.
 
-synthesegenerale <- full_db_tibble %>%
-    group_by(continent) %>%
-  summarise(
-          count = n(),
-          median_Life_Expectancy = median(Life.expectancy, na.rm = T),
-          median_GDP_per_capita = median(gdp_per_capita, na.rm = T),
-          median_Energy_Consumption = median(primary_energy_consumption, na.rm = T),
-          median_Production_oil = median(oil_production, na.rm = T),
-          median_Production_gas = median(gas_production, na.rm = T),
-          median_Production_Coal = median(coal_production, na.rm = T) )
-    
+La consommation d'énergie par personne semble toutefois présenter une corrélatoin plus intéressante avec l'espérance de vie. En effet, les deux continents ayant une espérance de vie plus faible, soit l'Afrique (59 ans) et l'Océanie (68 ans) sont également les deux seuls avec la consommation d'énergie par personne la plus basse, soit 5230 kilowatt-heures et 1947 kilowatt-heures respectivement, tandis que les autres continents dépassent tous la barre du 10 000 kilowatt-heures.
+
+Ces deux continents arrivent également en queue de peloton en ce qui a trait à la production d'énergie - ici uniquement les énergies fossies du pétrole, du charbon et du gas-. C'est l'Asie qui arrive en tête de file pour les trois énergies étudiées, bien que cela ne semble pas tirer vers le haut son bilan médian pour ce qui est du PIB par habitant, laissant croire que quelques pays ont une production qui leur permet de s'enrichir, sans que ce soit le cas de la majorité des pays d'Asie.
+
+```{r bivarié}
+
+# synthesegenerale <- full_db_tibble %>%
+#     group_by(continent) %>%
+#   summarise(
+#           count = n(),
+#           median_Life_Expectancy = median(`Life expectancy`, na.rm = T),
+#           median_GDP_per_capita = median(gdp_per_capita, na.rm = T),
+#           median_Energy_Consumption = median(primary_energy_consumption, na.rm = T),
+#           median_Production_oil = median(oil_production, na.rm = T),
+#           median_Production_gas = median(gas_production, na.rm = T),
+#           median_Production_Coal = median(coal_production, na.rm = T) )
+#   J'ai enlevé cette analyse car elle combine plusieurs années à la fois et ne veut donc rien dire.   
     
 #Parce qu'il y a vraiment beaucoup de données, par pays et par année, je vais me concentrer sur les données de 2018 seulement, pour que chaque pays n'ai qu'une entree. Je prends 2018 car  c'est l'année la plus récente pour laquelle les données de GDP sont disponibles. 
 db_2018  <- subset(full_db_tibble, year=='2018') #donnes 2018 seulement
@@ -163,12 +171,12 @@ synthese2018 <- db_2018 %>%
     group_by(continent) %>%
   summarise(
           count = n(), #permet de verifier qu'on a bien les donnees d'une seule année sélectionnée. Ca marche !
-          median_Life_Expectancy = median(Life.expectancy, na.rm = T),
+          median_Life_Expectancy = median(`Life expectancy`, na.rm = T),
           median_GDP_per_capita = median(gdp_per_capita, na.rm = T),
-          median_Energy_Consumption = median(primary_energy_consumption, na.rm = T),
-          median_Production_oil = median(oil_production, na.rm = T),
-          median_Production_gas = median(gas_production, na.rm = T),
-          median_Production_Coal = median(coal_production, na.rm = T) )
+          median_Energy_per_capita = median(energy_per_capita, na.rm = T),
+          sum_Production_oil = sum(oil_production, na.rm = T),
+          sum_Production_gas = sum(gas_production, na.rm = T),
+          sum_Production_Coal = sum(coal_production, na.rm = T) )
 
 #Pour le plaisir, comparons avec les données de 2008 puisqu'il y avait une crise économique a ce moment
 db_2008  <- subset(full_db_tibble, year=='2008') #donnes 2018 seulement
@@ -176,12 +184,12 @@ synthese2008 <- db_2008 %>%
     group_by(continent) %>%
   summarise(
           count = n(), #permet de verifier qu'on a bien les donnees d'une seule année sélectionnée. Ca marche !
-          median_Life_Expectancy = median(Life.expectancy, na.rm = T),
+          median_Life_Expectancy = median(`Life expectancy`, na.rm = T),
           median_GDP_per_capita = median(gdp_per_capita, na.rm = T),
-          median_Energy_Consumption = median(primary_energy_consumption, na.rm = T),
-          median_Production_oil = median(oil_production, na.rm = T),
-          median_Production_gas = median(gas_production, na.rm = T),
-          median_Production_Coal = median(coal_production, na.rm = T) )
+          median_Energy_per_capita = median(energy_per_capita, na.rm = T),
+          sum_Production_oil = sum(oil_production, na.rm = T),
+          sum_Production_gas = sum(gas_production, na.rm = T),
+          sum_Production_Coal = sum(coal_production, na.rm = T) )
 
 #Ayant recu un message derreur avec ma kable, je revise ses settings.
 options(knitr.table.format = function() {
@@ -252,18 +260,15 @@ G1_Fossil_Consumption
 
 ------------------------------------------------------------------------
 
-### Type d'énergie consommé au fil du temps
+### Type d'énergie utilisée pour l'électricité consommée au fil du temps
 
-```{r Graphique 2 - Types denergie}
+En plus d'une variation importante de la quantité d'énergie consommée, il y a également une grande disparité de sortes d'énergie consommée dans les différents pays du monde. Au-delà de la consommation d'énergies fossiles, les pays utilisent un éventail de types d'énergie afin de répondre aux besoins toujours croissants de leur population.
 
+Pour explorer les types d'énergie consommés, ce rapport se centrera sur les types d'énergie dont sont issus l'électricité dans certains pays clés, dont le Canada et les grands consommateurs d'énergie identifiés dans la section précédente, soit les États-Unis, la Chine et l'Inde.
 
-# hydro_share_elec
-# gas_share_elec
-# nuclear_share_elec
-# oil_share_elec
-# other_renewables_share_elec
+#### Canada
 
-
+```{r Graphique 2 Canada}
 #Canada
 donnees_Canada  <- subset(full_db_tibble, iso_code=='CAN') %>%
     select (year, coal_share_elec, oil_share_elec, gas_share_elec, nuclear_share_elec, biofuel_share_elec, hydro_share_elec, solar_share_elec, wind_share_elec, other_renewables_share_elec_exc_biofuel) %>% #petit tableau avec les variables dinteret
@@ -293,10 +298,15 @@ G2a_Energy_Share_Canada <- ggplot(data = donnees_Canada) + geom_area(mapping = a
 
 G2a_Energy_Share_Canada
 ggsave(path = "figures", filename = "G2a_Energy_Share_Canada.png")
+```
 
+Le portrait du Canada ci-dessus montre que le Canada fait la belle part à l'hydro électricité, bien que la proportion de celle-ci ait diminué dans la consommation d'électricité entre 1985 et 2021. Les pertes en hydro électricité ont été compensés par des gains en énergie éolienne. Le pays présente donc un bilan stable en proportion d'énergie renouvelables. Quant aux énergies non-renouvelables, le charbon laisse progressivement sa place à l'industrie du gaz.
+
+#### États-Unis
+
+```{r Graphique 2 - États-Unis}
 
 #USA
-
 donnees_USA  <- subset(full_db_tibble, iso_code=='USA') %>%
     select (year, coal_share_elec, oil_share_elec, gas_share_elec, nuclear_share_elec, biofuel_share_elec, hydro_share_elec, solar_share_elec, wind_share_elec, other_renewables_share_elec_exc_biofuel) %>% #petit tableau avec les variables dinteret
     pivot_longer(cols = coal_share_elec:other_renewables_share_elec_exc_biofuel, names_to = "type_energy", values_drop_na = T) %>%  #pour que le type denergie devienne une donnee et non une variable
@@ -326,7 +336,13 @@ G2b_Energy_Share_USA <- ggplot(data = donnees_USA) + geom_area(mapping = aes(x =
 G2b_Energy_Share_USA
 ggsave(path = "figures", filename = "G2b_Energy_Share_USA.png")
 
+```
 
+Le portrait des États-Unis est tout autre. Bien que l'on constate une augmentation similaire de l'énergie éolionne, la part d'énergie renouvelable reste inférieure au quart, comparativement à plus de la moitié pour le Canada. Au sud de la frontière s'effectue également un transfert de l'industrie du charbon à celle du gaz, ctte dernière représentant près du tiers de l'électricité consommée.
+
+#### Chine
+
+```{r Graphique 2 Chine}
 #China
 
 donnees_Chine  <- subset(full_db_tibble, iso_code=='CHN') %>%
@@ -357,6 +373,15 @@ G2c_Energy_Share_Chine <- ggplot(data = donnees_Chine) + geom_area(mapping = aes
 
 G2c_Energy_Share_Chine
 ggsave(path = "figures", filename = "G2c_Energy_Share_Chine.png")
+```
+
+Sans surprise, la Chine, qui arrive au premier rang de la consommation de combustibles fossiles voit ces derniers représenter près des trois quarts de sa consommation d'électricité. Le charbon reste sa source principale d'électricité. On note toutefois un effort de diversification des sources d'énergie depuis le tournant des années 2000, reflété par un augmentation de l'énergie nucléaire, des biocarburants et plus récemment, de l'énergie solaire et éolienne. Cela fait de la Chine un pays ayant une proportion plus importante de son électricité issue de sources renouvelables[^1] que certains pays dits "développés", comme les États-Unis. Prises ensemble, ces sources d'énergie ont fait baisser quelque la proportion de charbon dans la consommation d'électricité depuis l'an 2000, sans pour autant renverser la tendance.
+
+[^1]: Compte tenu des déchets qu'elle engendre et des risques qu'elle peut poser à la santé humaine, l'énergie nucléaire n'est pas considérée renouvelable.
+
+#### Inde
+
+```{r Graphique 2 Inde}
 
 #Inde
 
@@ -390,10 +415,13 @@ G2d_Energy_Share_Inde <- ggplot(data = donnees_Inde) + geom_area(mapping = aes(x
 G2d_Energy_Share_Inde
 ggsave(path = "figures", filename = "G2d_Energy_Share_Inde.png")
 
+```
 
-#Inde
+Quant à l'Inde, il s'agit du seul pays étudié ici dont la proportion d'énergie renouvelables (éolienne, solaire et hydroélectrique) a diminué depuis 1985, au profit d'une augmentation d'environ 12% du charbon comme source d'électricité. Les gains en énergie éolienne et solaire ne font que compenser une partie des pertes en hydroélectricité.
 
+#### Norvège
 
+```{r Graphique 2 Norvege}
 donnees_Norvege <- subset(full_db_tibble, iso_code=='NOR') %>%
     select (year, coal_share_elec, oil_share_elec, gas_share_elec, nuclear_share_elec, biofuel_share_elec, hydro_share_elec, solar_share_elec, wind_share_elec, other_renewables_share_elec_exc_biofuel) %>% #petit tableau avec les variables dinteret
     pivot_longer(cols = coal_share_elec:other_renewables_share_elec_exc_biofuel, names_to = "type_energy", values_drop_na = T) %>%  #pour que le type denergie devienne une donnee et non une variable
@@ -423,4 +451,18 @@ G2e_Energy_Share_Norvege <- ggplot(data = donnees_Norvege) + geom_area(mapping =
 G2e_Energy_Share_Norvege
 ggsave(path = "figures", filename = "G2e_Energy_Share_Norvege.png")
 
+
+#en retrospect, j'aurais pu faire un petit dataset avec juste les pays que je voulais puis faire un facet par pays au lieu de refaire le code 5 fois. 
 ```
+
+Face à cette domination des combustibles fossiles comme sources d'électricté, il peut sembler que l'énergie verte soit une chimère. À titre comparatif, nous avons donc ici intégré la Norvège à l'analyse. Peuplé de lac et de rivières, le territoire de la Norvège est propice au développe de l'hydroélectricité - potentiel que le petit pays nordique exploite depuis plusieurs décennies déjà. La Norvège démontre que malgré l'utilisation massive dans le monde de combustibles fossibles pour la création d'électricité, un autre modèle est accessible.
+
+### Conclusion
+
+Bref, ce portrait permet de mettre en exergue l'augmentation de la consommation d'énergie et la diversité de sources d'énergies qui sont utilisées pour créer de l'électricité à travers le monde.
+
+Devant l'inéluctable augmentation exponentielle de la consommation d'énergie dans le monde et le faible degré d'augmentation d'énergie issues de sources renouvelables, il convient de repenser la viabilité du modèle de consommation actuel.
+
+À titre d'exemple, en démontrant qu'une proportion encore importante d'électricité continue à être issue de sources non-renouvelables, cette analyse remet également en doute la viabilité des projets d'électrification des transports, comme la démocratisation de la voiture électrique. Présentée comme une alternative verte, la voiture électrique l'est-elle vraiment si l'énergie utilisée pour alimenter celle-ci en électricité provient de source comme le charbon et le gas ?
+
+Hélas, face à l'augmentation de la consommation d'énergie, nombreux pays cherchent à augmenter leur production d'énergie pour répondre à l'augmentation de la demande, au lieu de développer des mécanismes de réduction de la consommation énergétique.
